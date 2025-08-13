@@ -19,7 +19,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         startTime: planRequest.startTime,
         endDate: new Date(planRequest.endDate),
         checkInTime: planRequest.checkInTime,
-        interests: planRequest.interests,
+        interests: planRequest.interests || null,
       });
 
       // Generate itinerary using ChatGPT
@@ -31,7 +31,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           startTime: planRequest.startTime,
           endDate: planRequest.endDate,
           checkInTime: planRequest.checkInTime,
-          interests: planRequest.interests,
+          interests: planRequest.interests || undefined,
         });
 
         // Geocode locations in the itinerary

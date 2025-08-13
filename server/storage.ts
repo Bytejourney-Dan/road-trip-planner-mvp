@@ -22,6 +22,7 @@ export class MemStorage implements IStorage {
     const id = randomUUID();
     const trip: Trip = {
       ...insertTrip,
+      interests: insertTrip.interests || null,
       id,
       status: "pending",
       itinerary: null,

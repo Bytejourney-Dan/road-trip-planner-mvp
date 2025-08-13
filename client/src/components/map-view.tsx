@@ -3,6 +3,12 @@ import { MapPin, Camera, Bed, ZoomIn, ZoomOut, Maximize } from "lucide-react";
 import { TripItinerary } from "@/types/trip";
 import { LoadingState } from "./loading-state";
 
+declare global {
+  interface Window {
+    google: any;
+  }
+}
+
 interface MapViewProps {
   itinerary?: TripItinerary;
   isLoading: boolean;
@@ -10,7 +16,7 @@ interface MapViewProps {
 
 export function MapView({ itinerary, isLoading }: MapViewProps) {
   const mapRef = useRef<HTMLDivElement>(null);
-  const googleMapRef = useRef<google.maps.Map | null>(null);
+  const googleMapRef = useRef<any | null>(null);
 
   useEffect(() => {
     if (!mapRef.current) return;
@@ -19,10 +25,10 @@ export function MapView({ itinerary, isLoading }: MapViewProps) {
     const initMap = () => {
       if (!mapRef.current) return;
 
-      googleMapRef.current = new google.maps.Map(mapRef.current, {
+      googleMapRef.current = new window.google.maps.Map(mapRef.current, {
         zoom: 6,
         center: { lat: 37.7749, lng: -122.4194 }, // Default to San Francisco
-        mapTypeId: google.maps.MapTypeId.ROADMAP,
+        mapTypeId: window.google.maps.MapTypeId.ROADMAP,
       });
     };
 
@@ -45,21 +51,21 @@ export function MapView({ itinerary, isLoading }: MapViewProps) {
     // Clear existing markers and polylines
     // Note: In a production app, you'd want to store references to markers/polylines to clear them properly
 
-    const bounds = new google.maps.LatLngBounds();
-    const markers: google.maps.Marker[] = [];
+    const bounds = new window.google.maps.LatLngBounds();
+    const markers: any[] = [];
 
     // Create route polyline coordinates
-    const routeCoordinates: google.maps.LatLng[] = [];
+    const routeCoordinates: any[] = [];
 
     itinerary.days.forEach((day, index) => {
       // Add markers for overnight locations
       if (day.overnightCoordinates) {
-        const marker = new google.maps.Marker({
+        const marker = new window.google.maps.Marker({
           position: { lat: day.overnightCoordinates.lat, lng: day.overnightCoordinates.lng },
           map: googleMapRef.current,
           title: `Day ${day.dayNumber}: ${day.overnightLocation}`,
           icon: {
-            path: google.maps.SymbolPath.CIRCLE,
+            path: window.google.maps.SymbolPath.CIRCLE,
             scale: 8,
             fillColor: '#10b981',
             fillOpacity: 1,
@@ -71,17 +77,17 @@ export function MapView({ itinerary, isLoading }: MapViewProps) {
         markers.push(marker);
         bounds.extend(marker.getPosition()!);
         
-        routeCoordinates.push(new google.maps.LatLng(day.overnightCoordinates.lat, day.overnightCoordinates.lng));
+        routeCoordinates.push(new window.google.maps.LatLng(day.overnightCoordinates.lat, day.overnightCoordinates.lng));
       }
 
       // Add markers for route start/end if available
       if (index === 0 && day.route.fromCoordinates) {
-        const startMarker = new google.maps.Marker({
+        const startMarker = new window.google.maps.Marker({
           position: { lat: day.route.fromCoordinates.lat, lng: day.route.fromCoordinates.lng },
           map: googleMapRef.current,
           title: `Start: ${day.route.from}`,
           icon: {
-            path: google.maps.SymbolPath.CIRCLE,
+            path: window.google.maps.SymbolPath.CIRCLE,
             scale: 10,
             fillColor: '#3b82f6',
             fillOpacity: 1,
@@ -94,12 +100,12 @@ export function MapView({ itinerary, isLoading }: MapViewProps) {
       }
 
       if (index === itinerary.days.length - 1 && day.route.toCoordinates) {
-        const endMarker = new google.maps.Marker({
+        const endMarker = new window.google.maps.Marker({
           position: { lat: day.route.toCoordinates.lat, lng: day.route.toCoordinates.lng },
           map: googleMapRef.current,
           title: `End: ${day.route.to}`,
           icon: {
-            path: google.maps.SymbolPath.CIRCLE,
+            path: window.google.maps.SymbolPath.CIRCLE,
             scale: 10,
             fillColor: '#ef4444',
             fillOpacity: 1,
@@ -114,7 +120,7 @@ export function MapView({ itinerary, isLoading }: MapViewProps) {
 
     // Create route polyline
     if (routeCoordinates.length > 1) {
-      new google.maps.Polyline({
+      new window.google.maps.Polyline({
         path: routeCoordinates,
         geodesic: true,
         strokeColor: '#3b82f6',

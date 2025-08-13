@@ -47,8 +47,8 @@ Preferred communication style: Simple, everyday language.
 - **Features**: Interactive markers, route polylines, and location pins
 
 ### Component Architecture
-- **Trip Form**: Collects user input with validation
-- **Map View**: Interactive Google Maps with route visualization
+- **Trip Form**: Collects user input with validation (removed max daily driving hours as requested)
+- **Map View**: Interactive Google Maps with route visualization using secure frontend API key
 - **Itinerary View**: Structured display of day-by-day travel plans
 - **Loading States**: User feedback during AI processing
 - **Error Handling**: Comprehensive error boundaries and user notifications
@@ -62,16 +62,17 @@ Preferred communication style: Simple, everyday language.
 ## External Dependencies
 
 ### AI Services
-- **OpenAI API**: GPT-4o model for intelligent itinerary generation
-- **Authentication**: API key-based authentication
+- **OpenAI API**: GPT-4o model for intelligent itinerary generation without max driving hours constraint
+- **Authentication**: API key-based authentication (OPENAI_API_KEY)
 - **Rate Limiting**: Built-in OpenAI rate limiting and error handling
+- **Prompt Engineering**: Simplified prompts focusing on realistic travel times and attraction recommendations
 
 ### Mapping Services
-- **Google Maps Platform**: Multiple API integrations
-  - Maps JavaScript API for interactive map display
-  - Geocoding API for address-to-coordinate conversion
-  - Routes API v2 for driving directions and time estimates
-- **Authentication**: API key authentication with environment variable configuration
+- **Google Maps Platform**: Multiple API integrations with separate keys for security
+  - Frontend Key (GOOGLE_MAPS_FRONTEND_API_KEY): Maps JavaScript API for interactive map display in browser
+  - Server Key (GOOGLE_MAPS_SERVER_API_KEY): Geocoding API for address-to-coordinate conversion on server
+  - Routes API v2 for driving directions and time estimates (planned)
+- **Security**: Separate API keys follow Google's best practices - frontend key visible in browser but domain-restricted, server key secure and API-restricted
 
 ### Database Services
 - **Neon Database**: PostgreSQL-compatible serverless database
