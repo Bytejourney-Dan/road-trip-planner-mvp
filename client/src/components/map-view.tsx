@@ -152,7 +152,18 @@ export function MapView({ itinerary, isLoading }: MapViewProps) {
           position: { lat: day.overnightCoordinates.lat, lng: day.overnightCoordinates.lng },
           map: googleMapRef.current,
           title: `Day ${day.dayNumber}: ${day.overnightLocation}`,
-          // Use default Google Maps pin - no custom icon for better performance
+          icon: {
+            url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+              <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40" fill="none">
+                <circle cx="20" cy="20" r="18" fill="#3b82f6" stroke="#fff" stroke-width="3"/>
+                <text x="20" y="26" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12" font-weight="bold">
+                  Day ${day.dayNumber}
+                </text>
+              </svg>
+            `),
+            scaledSize: new window.google.maps.Size(40, 40),
+            anchor: new window.google.maps.Point(20, 20)
+          }
         });
 
         // Add click handler for overnight location
