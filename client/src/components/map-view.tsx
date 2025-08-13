@@ -227,21 +227,8 @@ export function MapView({ itinerary, isLoading }: MapViewProps) {
     }
   };
 
-  if (!itinerary && !isLoading) {
-    return (
-      <div className="flex-1 relative">
-        <div className="w-full h-full bg-gray-100">
-          <div className="flex items-center justify-center h-full">
-            <div className="text-center text-gray-500">
-              <MapPin className="h-16 w-16 mb-4 text-gray-300 mx-auto" />
-              <h3 className="text-lg font-medium mb-2" data-testid="text-empty-state">Ready to Plan Your Adventure?</h3>
-              <p className="text-sm" data-testid="text-empty-instructions">Fill out the trip details and click "Generate Trip Plan" to see your route</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  // Always show the map, but with overlay message when no trip is planned
+  const showEmptyState = !itinerary && !isLoading;
 
   // Show message if geocoding failed but itinerary exists
   if (itinerary && (itinerary as any).geocodingStatus === 'failed') {
@@ -269,8 +256,19 @@ export function MapView({ itinerary, isLoading }: MapViewProps) {
     <div className="flex-1 relative">
       {isLoading && <LoadingState />}
       
-      {/* Google Maps Container */}
+      {/* Google Maps Container - always visible */}
       <div ref={mapRef} className="w-full h-full bg-gray-100" data-testid="map-container" />
+
+      {/* Empty State Overlay - only when no trip is planned */}
+      {showEmptyState && (
+        <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center">
+          <div className="bg-white rounded-lg p-8 shadow-lg text-center max-w-md mx-4">
+            <MapPin className="h-16 w-16 mb-4 text-gray-300 mx-auto" />
+            <h3 className="text-lg font-medium mb-2 text-gray-900" data-testid="text-empty-state">Ready to Plan Your Adventure?</h3>
+            <p className="text-sm text-gray-600" data-testid="text-empty-instructions">Fill out the trip details and click "Generate Trip Plan" to see your route on this map</p>
+          </div>
+        </div>
+      )}
 
       {/* Map Controls */}
       <div className="absolute top-4 right-4 bg-white rounded-lg shadow-lg p-2 space-y-2" data-testid="map-controls">
