@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import { MapPin, Flag, Clock, Sparkles, CheckCircle } from "lucide-react";
 import { TripFormData, Trip } from "@/types/trip";
 
@@ -22,16 +23,28 @@ export function TripForm({ onSubmit, isLoading, completedTrip }: TripFormProps) 
     startTime: "09:00",
     endDate: "",
     checkInTime: "22:00",
-    interests: "none",
+    interests: [],
   });
+
+  const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSubmit(formData);
   };
 
-  const handleInputChange = (field: keyof TripFormData, value: string | number) => {
+  const handleInputChange = (field: keyof TripFormData, value: string | number | string[]) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleInterestToggle = (interest: string, checked: boolean) => {
+    setSelectedInterests(prev => {
+      const newInterests = checked 
+        ? [...prev, interest]
+        : prev.filter(i => i !== interest);
+      handleInputChange("interests", newInterests);
+      return newInterests;
+    });
   };
 
   return (
@@ -96,7 +109,7 @@ export function TripForm({ onSubmit, isLoading, completedTrip }: TripFormProps) 
                 />
               </div>
               <div>
-                <Label htmlFor="startTime" className="block text-sm font-medium text-gray-700 mb-2">Start Time</Label>
+                <Label htmlFor="startTime" className="block text-sm font-medium text-gray-700 mb-2">Departure Time</Label>
                 <Select 
                   value={formData.startTime} 
                   onValueChange={(value) => handleInputChange("startTime", value)}
@@ -113,6 +126,18 @@ export function TripForm({ onSubmit, isLoading, completedTrip }: TripFormProps) 
                     <SelectItem value="10:00">10:00 AM</SelectItem>
                     <SelectItem value="11:00">11:00 AM</SelectItem>
                     <SelectItem value="12:00">12:00 PM</SelectItem>
+                    <SelectItem value="13:00">1:00 PM</SelectItem>
+                    <SelectItem value="14:00">2:00 PM</SelectItem>
+                    <SelectItem value="15:00">3:00 PM</SelectItem>
+                    <SelectItem value="16:00">4:00 PM</SelectItem>
+                    <SelectItem value="17:00">5:00 PM</SelectItem>
+                    <SelectItem value="18:00">6:00 PM</SelectItem>
+                    <SelectItem value="19:00">7:00 PM</SelectItem>
+                    <SelectItem value="20:00">8:00 PM</SelectItem>
+                    <SelectItem value="21:00">9:00 PM</SelectItem>
+                    <SelectItem value="22:00">10:00 PM</SelectItem>
+                    <SelectItem value="23:00">11:00 PM</SelectItem>
+                    <SelectItem value="00:00">12:00 AM</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -158,29 +183,42 @@ export function TripForm({ onSubmit, isLoading, completedTrip }: TripFormProps) 
           {/* Additional Options */}
           <div className="space-y-4">
             <div>
-              <Label htmlFor="interests" className="block text-sm font-medium text-gray-700 mb-2">Interests (Optional)</Label>
-              <Select 
-                value={formData.interests} 
-                onValueChange={(value) => handleInputChange("interests", value)}
-                disabled={isLoading}
-              >
-                <SelectTrigger data-testid="select-interests">
-                  <SelectValue placeholder="Select your travel interests" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">None selected</SelectItem>
-                  <SelectItem value="National parks and nature">National parks and nature</SelectItem>
-                  <SelectItem value="Museums and culture">Museums and culture</SelectItem>
-                  <SelectItem value="Food and dining">Food and dining</SelectItem>
-                  <SelectItem value="Beaches and coast">Beaches and coast</SelectItem>
-                  <SelectItem value="Historic sites">Historic sites</SelectItem>
-                  <SelectItem value="Shopping">Shopping</SelectItem>
-                  <SelectItem value="Adventure and outdoor activities">Adventure and outdoor activities</SelectItem>
-                  <SelectItem value="Art and galleries">Art and galleries</SelectItem>
-                  <SelectItem value="Music and entertainment">Music and entertainment</SelectItem>
-                  <SelectItem value="Architecture">Architecture</SelectItem>
-                </SelectContent>
-              </Select>
+              <Label className="block text-sm font-medium text-gray-700 mb-3">Interests (Optional)</Label>
+              <div className="space-y-3 max-h-40 overflow-y-auto" data-testid="interests-checkboxes">
+                {[
+                  "National parks and nature",
+                  "Museums and culture", 
+                  "Food and dining",
+                  "Beaches and coast",
+                  "Historic sites",
+                  "Shopping",
+                  "Adventure and outdoor activities",
+                  "Art and galleries",
+                  "Music and entertainment",
+                  "Architecture"
+                ].map((interest) => (
+                  <div key={interest} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={`interest-${interest}`}
+                      checked={selectedInterests.includes(interest)}
+                      onCheckedChange={(checked) => handleInterestToggle(interest, !!checked)}
+                      disabled={isLoading}
+                      data-testid={`checkbox-${interest.toLowerCase().replace(/\s+/g, '-')}`}
+                    />
+                    <Label 
+                      htmlFor={`interest-${interest}`}
+                      className="text-sm font-normal cursor-pointer"
+                    >
+                      {interest}
+                    </Label>
+                  </div>
+                ))}
+              </div>
+              {selectedInterests.length > 0 && (
+                <p className="text-xs text-gray-500 mt-2">
+                  Selected: {selectedInterests.join(", ")}
+                </p>
+              )}
             </div>
           </div>
 

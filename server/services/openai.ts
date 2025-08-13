@@ -13,7 +13,7 @@ export interface TripPlanningRequest {
   endDate: string;
   checkInTime: string;
 
-  interests?: string;
+  interests?: string[];
 }
 
 export async function generateTripItinerary(request: TripPlanningRequest) {
@@ -29,7 +29,7 @@ Trip Details:
 - End Date: ${request.endDate}
 - Latest check-in time: ${request.checkInTime}
 
-${request.interests ? `- Interests: ${request.interests}` : ''}
+${request.interests && request.interests.length > 0 ? `- Interests: ${request.interests.join(', ')}` : ''}
 
 Rules:
 - Assume travel is by car

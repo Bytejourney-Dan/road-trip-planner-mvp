@@ -12,7 +12,7 @@ export const trips = pgTable("trips", {
   endDate: timestamp("end_date").notNull(),
   checkInTime: text("check_in_time").notNull(),
 
-  interests: text("interests"),
+  interests: text("interests").array(),
   itinerary: jsonb("itinerary"),
   status: text("status").notNull().default("pending"), // pending, completed, failed
   createdAt: timestamp("created_at").default(sql`now()`).notNull(),
