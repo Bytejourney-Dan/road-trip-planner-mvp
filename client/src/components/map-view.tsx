@@ -21,6 +21,16 @@ interface LocationInfo {
   date?: string;
   description?: string;
   attractions?: Array<{ name: string; description: string }>;
+  placeDetails?: {
+    placeId: string;
+    formattedAddress: string;
+    rating?: number;
+    userRatingsTotal?: number;
+    photos?: string[];
+    types?: string[];
+    website?: string;
+    phoneNumber?: string;
+  };
   route?: {
     from: string;
     to: string;
@@ -263,7 +273,8 @@ export function MapView({ itinerary, isLoading }: MapViewProps) {
               name: attraction.name,
               description: attraction.description,
               dayNumber: day.dayNumber,
-              date: day.date
+              date: day.date,
+              placeDetails: attraction.placeDetails
             });
           });
 
@@ -452,6 +463,7 @@ export function MapView({ itinerary, isLoading }: MapViewProps) {
                 {selectedLocation.type === 'start' && '🚀 Trip Start'}
                 {selectedLocation.type === 'overnight' && `🛏️ Day ${selectedLocation.dayNumber} Stop`}
                 {selectedLocation.type === 'end' && '🏁 Trip End'}
+                {selectedLocation.type === 'attraction' && `📍 Attraction`}
               </h3>
               <button
                 onClick={() => setSelectedLocation(null)}
@@ -471,7 +483,96 @@ export function MapView({ itinerary, isLoading }: MapViewProps) {
               {selectedLocation.date && (
                 <p className="text-sm text-gray-600 pl-7" data-testid="text-location-date">{selectedLocation.date}</p>
               )}
+              {selectedLocation.description && selectedLocation.type === 'attraction' && (
+                <p className="text-sm text-gray-700 pl-7 mt-2" data-testid="text-attraction-description">{selectedLocation.description}</p>
+              )}
             </div>
+
+            {/* Places API Details for Attractions */}
+            {selectedLocation.type === 'attraction' && selectedLocation.placeDetails && (
+              <div className="mb-4">
+                {/* Address */}
+                {selectedLocation.placeDetails.formattedAddress && (
+                  <div className="mb-3 p-3 glass-light rounded-xl">
+                    <div className="flex items-center mb-1">
+                      <MapPin className="h-4 w-4 text-gray-500 mr-2" />
+                      <span className="text-sm text-gray-600">Address</span>
+                    </div>
+                    <p className="text-sm text-gray-800 pl-6" data-testid="text-place-address">
+                      {selectedLocation.placeDetails.formattedAddress}
+                    </p>
+                  </div>
+                )}
+
+                {/* Rating */}
+                {selectedLocation.placeDetails.rating && (
+                  <div className="mb-3 p-3 glass-light rounded-xl">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center">
+                        <span className="text-yellow-500 text-lg mr-2">⭐</span>
+                        <span className="font-semibold text-gray-900" data-testid="text-place-rating">
+                          {selectedLocation.placeDetails.rating.toFixed(1)}
+                        </span>
+                        {selectedLocation.placeDetails.userRatingsTotal && (
+                          <span className="text-sm text-gray-600 ml-2" data-testid="text-place-reviews">
+                            ({selectedLocation.placeDetails.userRatingsTotal} reviews)
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Photos */}
+                {selectedLocation.placeDetails.photos && selectedLocation.placeDetails.photos.length > 0 && (
+                  <div className="mb-3">
+                    <h4 className="text-sm font-semibold text-gray-900 mb-2">Photos</h4>
+                    <div className="grid grid-cols-2 gap-2">
+                      {selectedLocation.placeDetails.photos.slice(0, 2).map((photo, index) => (
+                        <img
+                          key={index}
+                          src={photo}
+                          alt={`${selectedLocation.name} photo ${index + 1}`}
+                          className="w-full h-20 object-cover rounded-lg"
+                          data-testid={`place-photo-${index}`}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Contact Info */}
+                {(selectedLocation.placeDetails.website || selectedLocation.placeDetails.phoneNumber) && (
+                  <div className="mb-3 p-3 glass-light rounded-xl">
+                    <h4 className="text-sm font-semibold text-gray-900 mb-2">Contact</h4>
+                    <div className="space-y-2">
+                      {selectedLocation.placeDetails.phoneNumber && (
+                        <div className="flex items-center">
+                          <span className="text-sm text-gray-600 w-16">Phone:</span>
+                          <span className="text-sm text-gray-800" data-testid="text-place-phone">
+                            {selectedLocation.placeDetails.phoneNumber}
+                          </span>
+                        </div>
+                      )}
+                      {selectedLocation.placeDetails.website && (
+                        <div className="flex items-center">
+                          <span className="text-sm text-gray-600 w-16">Website:</span>
+                          <a
+                            href={selectedLocation.placeDetails.website}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-sm text-blue-600 hover:text-blue-800 underline"
+                            data-testid="link-place-website"
+                          >
+                            Visit website
+                          </a>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Route Information */}
             {selectedLocation.route && (

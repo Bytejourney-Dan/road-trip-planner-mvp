@@ -67,4 +67,14 @@ export interface Attraction {
     lat: number;
     lng: number;
   };
+  placeDetails?: {
+    placeId: string;
+    formattedAddress: string;
+    rating?: number;
+    userRatingsTotal?: number;
+    photos?: string[];
+    types?: string[];
+    website?: string;
+    phoneNumber?: string;
+  };
 }
