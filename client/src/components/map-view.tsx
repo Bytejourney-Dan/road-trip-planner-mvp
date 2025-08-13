@@ -73,14 +73,7 @@ export function MapView({ itinerary, isLoading }: MapViewProps) {
           position: { lat: day.overnightCoordinates.lat, lng: day.overnightCoordinates.lng },
           map: googleMapRef.current,
           title: `Day ${day.dayNumber}: ${day.overnightLocation}`,
-          icon: {
-            path: window.google.maps.SymbolPath.CIRCLE,
-            scale: 8,
-            fillColor: '#10b981',
-            fillOpacity: 1,
-            strokeColor: '#059669',
-            strokeWeight: 2,
-          },
+          // Use default Google Maps pin - no custom icon for better performance
         });
 
         markers.push(marker);
@@ -95,14 +88,7 @@ export function MapView({ itinerary, isLoading }: MapViewProps) {
           position: { lat: day.route.fromCoordinates.lat, lng: day.route.fromCoordinates.lng },
           map: googleMapRef.current,
           title: `Start: ${day.route.from}`,
-          icon: {
-            path: window.google.maps.SymbolPath.CIRCLE,
-            scale: 10,
-            fillColor: '#3b82f6',
-            fillOpacity: 1,
-            strokeColor: '#2563eb',
-            strokeWeight: 2,
-          },
+          label: 'A', // Use Google's built-in letter labels
         });
         markers.push(startMarker);
         bounds.extend(startMarker.getPosition()!);
@@ -113,41 +99,34 @@ export function MapView({ itinerary, isLoading }: MapViewProps) {
           position: { lat: day.route.toCoordinates.lat, lng: day.route.toCoordinates.lng },
           map: googleMapRef.current,
           title: `End: ${day.route.to}`,
-          icon: {
-            path: window.google.maps.SymbolPath.CIRCLE,
-            scale: 10,
-            fillColor: '#ef4444',
-            fillOpacity: 1,
-            strokeColor: '#dc2626',
-            strokeWeight: 2,
-          },
+          label: 'B', // Use Google's built-in letter labels
         });
         markers.push(endMarker);
         bounds.extend(endMarker.getPosition()!);
       }
     });
 
-    // Create route polyline
+    // Create a simple connecting polyline (fast rendering)
     if (routeCoordinates.length > 1) {
       new window.google.maps.Polyline({
         path: routeCoordinates,
         geodesic: true,
-        strokeColor: '#3b82f6',
-        strokeOpacity: 1.0,
+        strokeColor: '#4285F4', // Google's blue color
+        strokeOpacity: 0.8,
         strokeWeight: 3,
         map: googleMapRef.current,
       });
     }
 
-    // Fit map to show all markers
+    // Fit map to show all markers immediately
     if (!bounds.isEmpty()) {
-      googleMapRef.current.fitBounds(bounds);
-      // Add some padding to the bounds
-      setTimeout(() => {
-        if (googleMapRef.current.getZoom() > 15) {
-          googleMapRef.current.setZoom(15);
+      googleMapRef.current.fitBounds(bounds, 50); // Add 50px padding
+      // Limit zoom level for better overview
+      const listener = window.google.maps.event.addListenerOnce(googleMapRef.current, 'bounds_changed', () => {
+        if (googleMapRef.current.getZoom() > 12) {
+          googleMapRef.current.setZoom(12);
         }
-      }, 100);
+      });
     }
 
   }, [itinerary]);
