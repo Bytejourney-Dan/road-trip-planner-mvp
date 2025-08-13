@@ -122,7 +122,7 @@ export function MapView({ itinerary, isLoading }: MapViewProps) {
     const bounds = new window.google.maps.LatLngBounds();
     const markers: any[] = [];
 
-    // Create route polyline coordinates
+    // Create route polyline coordinates including attractions as waypoints
     const routeCoordinates: any[] = [];
 
     // Add start location to route coordinates first
@@ -134,6 +134,18 @@ export function MapView({ itinerary, isLoading }: MapViewProps) {
     }
 
     itinerary.days.forEach((day, index) => {
+      // Add attractions as waypoints before the overnight location
+      if (day.attractions && day.attractions.length > 0) {
+        day.attractions.forEach((attraction) => {
+          if (attraction.coordinates) {
+            routeCoordinates.push(new window.google.maps.LatLng(
+              attraction.coordinates.lat,
+              attraction.coordinates.lng
+            ));
+          }
+        });
+      }
+
       // Add markers for overnight locations
       if (day.overnightCoordinates) {
         const marker = new window.google.maps.Marker({
@@ -159,6 +171,7 @@ export function MapView({ itinerary, isLoading }: MapViewProps) {
         markersRef.current.push(marker);
         bounds.extend(marker.getPosition()!);
         
+        // Add overnight location to route coordinates after attractions
         routeCoordinates.push(new window.google.maps.LatLng(day.overnightCoordinates.lat, day.overnightCoordinates.lng));
       }
 
@@ -274,7 +287,7 @@ export function MapView({ itinerary, isLoading }: MapViewProps) {
               description: attraction.description,
               dayNumber: day.dayNumber,
               date: day.date,
-              placeDetails: attraction.placeDetails
+              placeDetails: (attraction as any).placeDetails
             });
           });
 
