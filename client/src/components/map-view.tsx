@@ -66,6 +66,14 @@ export function MapView({ itinerary, isLoading }: MapViewProps) {
     // Create route polyline coordinates
     const routeCoordinates: any[] = [];
 
+    // Add start location to route coordinates first
+    if (itinerary.days.length > 0 && itinerary.days[0].route?.fromCoordinates) {
+      routeCoordinates.push(new window.google.maps.LatLng(
+        itinerary.days[0].route.fromCoordinates.lat, 
+        itinerary.days[0].route.fromCoordinates.lng
+      ));
+    }
+
     itinerary.days.forEach((day, index) => {
       // Add markers for overnight locations
       if (day.overnightCoordinates) {

@@ -22,7 +22,7 @@ export function TripForm({ onSubmit, isLoading, completedTrip }: TripFormProps) 
     startTime: "09:00",
     endDate: "",
     checkInTime: "22:00",
-    interests: "",
+    interests: "none",
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -97,15 +97,24 @@ export function TripForm({ onSubmit, isLoading, completedTrip }: TripFormProps) 
               </div>
               <div>
                 <Label htmlFor="startTime" className="block text-sm font-medium text-gray-700 mb-2">Start Time</Label>
-                <Input
-                  id="startTime"
-                  type="time"
-                  value={formData.startTime}
-                  onChange={(e) => handleInputChange("startTime", e.target.value)}
-                  required
+                <Select 
+                  value={formData.startTime} 
+                  onValueChange={(value) => handleInputChange("startTime", value)}
                   disabled={isLoading}
-                  data-testid="input-start-time"
-                />
+                >
+                  <SelectTrigger data-testid="select-start-time">
+                    <SelectValue placeholder="Select departure time" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="06:00">6:00 AM</SelectItem>
+                    <SelectItem value="07:00">7:00 AM</SelectItem>
+                    <SelectItem value="08:00">8:00 AM</SelectItem>
+                    <SelectItem value="09:00">9:00 AM</SelectItem>
+                    <SelectItem value="10:00">10:00 AM</SelectItem>
+                    <SelectItem value="11:00">11:00 AM</SelectItem>
+                    <SelectItem value="12:00">12:00 PM</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
 
@@ -124,15 +133,24 @@ export function TripForm({ onSubmit, isLoading, completedTrip }: TripFormProps) 
               </div>
               <div>
                 <Label htmlFor="checkInTime" className="block text-sm font-medium text-gray-700 mb-2">Latest Check-in</Label>
-                <Input
-                  id="checkInTime"
-                  type="time"
-                  value={formData.checkInTime}
-                  onChange={(e) => handleInputChange("checkInTime", e.target.value)}
-                  required
+                <Select 
+                  value={formData.checkInTime} 
+                  onValueChange={(value) => handleInputChange("checkInTime", value)}
                   disabled={isLoading}
-                  data-testid="input-checkin-time"
-                />
+                >
+                  <SelectTrigger data-testid="select-checkin-time">
+                    <SelectValue placeholder="Select check-in time" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="18:00">6:00 PM</SelectItem>
+                    <SelectItem value="19:00">7:00 PM</SelectItem>
+                    <SelectItem value="20:00">8:00 PM</SelectItem>
+                    <SelectItem value="21:00">9:00 PM</SelectItem>
+                    <SelectItem value="22:00">10:00 PM</SelectItem>
+                    <SelectItem value="23:00">11:00 PM</SelectItem>
+                    <SelectItem value="00:00">12:00 AM</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
           </div>
@@ -141,16 +159,28 @@ export function TripForm({ onSubmit, isLoading, completedTrip }: TripFormProps) 
           <div className="space-y-4">
             <div>
               <Label htmlFor="interests" className="block text-sm font-medium text-gray-700 mb-2">Interests (Optional)</Label>
-              <Textarea
-                id="interests"
-                placeholder="e.g., National parks, museums, food, beaches..."
-                rows={3}
-                value={formData.interests}
-                onChange={(e) => handleInputChange("interests", e.target.value)}
+              <Select 
+                value={formData.interests} 
+                onValueChange={(value) => handleInputChange("interests", value)}
                 disabled={isLoading}
-                className="resize-none"
-                data-testid="textarea-interests"
-              />
+              >
+                <SelectTrigger data-testid="select-interests">
+                  <SelectValue placeholder="Select your travel interests" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">None selected</SelectItem>
+                  <SelectItem value="National parks and nature">National parks and nature</SelectItem>
+                  <SelectItem value="Museums and culture">Museums and culture</SelectItem>
+                  <SelectItem value="Food and dining">Food and dining</SelectItem>
+                  <SelectItem value="Beaches and coast">Beaches and coast</SelectItem>
+                  <SelectItem value="Historic sites">Historic sites</SelectItem>
+                  <SelectItem value="Shopping">Shopping</SelectItem>
+                  <SelectItem value="Adventure and outdoor activities">Adventure and outdoor activities</SelectItem>
+                  <SelectItem value="Art and galleries">Art and galleries</SelectItem>
+                  <SelectItem value="Music and entertainment">Music and entertainment</SelectItem>
+                  <SelectItem value="Architecture">Architecture</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
