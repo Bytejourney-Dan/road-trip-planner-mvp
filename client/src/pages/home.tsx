@@ -80,9 +80,9 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen relative overflow-hidden">
-      {/* Floating Header */}
-      <header className="absolute top-6 left-6 right-6 z-50 glass rounded-2xl animate-fade-in">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-blue-50 via-white to-purple-50">
+      {/* Header */}
+      <header className="glass rounded-none border-b border-white/20 z-50">
         <div className="px-6 py-4">
           <div className="flex justify-between items-center">
             <div className="flex items-center space-x-3">
@@ -95,7 +95,7 @@ export default function Home() {
               </div>
             </div>
             
-            {/* Floating Tab Switches */}
+            {/* Tab Switches */}
             <div className="flex bg-white/20 rounded-xl p-1">
               <Button
                 variant="ghost"
@@ -130,34 +130,34 @@ export default function Home() {
         </div>
       </header>
 
-      {/* Main Map Background - Hero Element */}
-      <div className="absolute inset-0">
-        <MapView 
-          key={completedTrip ? `map-${completedTrip.id}-${Date.now()}` : 'default'}
-          itinerary={completedTrip?.itinerary}
-          isLoading={planTripMutation.isPending}
-        />
-      </div>
-
-      {/* Floating Trip Planning Panel */}
-      <div className="absolute top-24 left-6 w-96 max-h-[calc(100vh-8rem)] z-40 animate-slide-up">
-        <div className="glass-strong rounded-2xl p-6 glass-scrollbar overflow-y-auto">
+      {/* Main Content Area */}
+      <div className="flex-1 flex">
+        {/* Left Panel - Trip Planning Form */}
+        <div className="w-96 glass-strong border-r border-white/20 p-6 overflow-y-auto glass-scrollbar">
           <TripForm 
             onSubmit={handlePlanTrip}
             isLoading={planTripMutation.isPending}
             completedTrip={completedTrip}
           />
         </div>
-      </div>
 
-      {/* Floating Itinerary Panel - Only visible when itinerary tab is active */}
-      {activeView === "itinerary" && (
-        <div className="absolute top-24 right-6 w-96 max-h-[calc(100vh-8rem)] z-40 animate-slide-up">
-          <div className="glass-strong rounded-2xl p-6 glass-scrollbar overflow-y-auto">
-            <ItineraryView itinerary={completedTrip?.itinerary} />
-          </div>
+        {/* Right Panel - Map or Itinerary */}
+        <div className="flex-1 relative">
+          {activeView === "map" ? (
+            <MapView 
+              key={completedTrip ? `map-${completedTrip.id}-${Date.now()}` : 'default'}
+              itinerary={completedTrip?.itinerary}
+              isLoading={planTripMutation.isPending}
+            />
+          ) : (
+            <div className="h-full p-6 overflow-y-auto glass-scrollbar">
+              <ItineraryView 
+                itinerary={completedTrip?.itinerary}
+              />
+            </div>
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 }

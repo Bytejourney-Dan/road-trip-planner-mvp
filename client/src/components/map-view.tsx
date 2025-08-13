@@ -320,13 +320,13 @@ export function MapView({ itinerary, isLoading }: MapViewProps) {
   }
 
   return (
-    <div className="flex-1 relative flex">
+    <div className="w-full h-full relative">
       {isLoading && <LoadingState />}
       
       {/* Google Maps Container - always visible */}
       <div 
         ref={mapRef} 
-        className={`bg-gray-100 transition-all duration-300 ${selectedLocation ? 'w-2/3' : 'w-full'} h-full`} 
+        className="w-full h-full bg-gray-100" 
         data-testid="map-container" 
       />
 
@@ -343,7 +343,7 @@ export function MapView({ itinerary, isLoading }: MapViewProps) {
 
       {/* Floating Location Info Panel */}
       {selectedLocation && (
-        <div className="absolute top-6 right-6 w-80 max-h-[calc(100vh-3rem)] z-50 animate-slide-up" data-testid="location-info-panel">
+        <div className="absolute top-4 right-4 w-80 max-h-[calc(100%-2rem)] z-50 animate-slide-up" data-testid="location-info-panel">
           <div className="glass-strong rounded-2xl p-6 glass-scrollbar overflow-y-auto">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-gray-900" data-testid="text-location-title">
@@ -446,7 +446,7 @@ export function MapView({ itinerary, isLoading }: MapViewProps) {
       )}
 
       {/* Floating Map Controls */}
-      <div className={`absolute ${selectedLocation ? 'bottom-6 right-6' : 'top-6 right-6'} glass rounded-xl p-2 space-y-2 transition-all duration-300`} data-testid="map-controls">
+      <div className={`absolute ${selectedLocation ? 'bottom-4 right-4' : 'top-4 right-4'} glass rounded-xl p-2 space-y-2 transition-all duration-300`} data-testid="map-controls">
         <button 
           className="block w-10 h-10 text-gray-700 hover:text-blue-600 hover:bg-white/30 rounded-lg flex items-center justify-center transition-all duration-200 glass-hover"
           onClick={() => {
