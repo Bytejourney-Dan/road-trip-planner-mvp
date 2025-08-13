@@ -14,6 +14,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
+  // Routes API endpoint
+  app.post("/api/routes", async (req, res) => {
+    try {
+      const routeRequest = req.body;
+      const apiKey = process.env.GOOGLE_MAPS_SERVER_API_KEY;
+      
+      if (!apiKey) {
+        return res.status(500).json({ error: "Google Maps Server API key not configured" });
+      }
+
+      const response = await fetch(`https://routes.googleapis.com/directions/v2:computeRoutes`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Goog-Api-Key': apiKey,
+          'X-Goog-FieldMask': 'routes.duration,routes.distanceMeters,routes.polyline.encodedPolyline'
+        },
+        body: JSON.stringify(routeRequest)
+      });
+
+      if (!response.ok) {
+        console.log('Routes API error:', response.status, response.statusText);
+        return res.status(response.status).json({ error: 'Routes API request failed' });
+      }
+
+      const data = await response.json();
+      res.json(data);
+    } catch (error) {
+      console.error("Routes API error:", error);
+      res.status(500).json({ error: "Failed to compute routes" });
+    }
+  });
+
   // Plan a new trip
   app.post("/api/trips/plan", async (req, res) => {
     try {

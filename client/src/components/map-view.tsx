@@ -40,7 +40,7 @@ export function MapView({ itinerary, isLoading }: MapViewProps) {
         .then(config => {
           
           const script = document.createElement('script');
-          script.src = `https://maps.googleapis.com/maps/api/js?key=${config.apiKey}&libraries=places`;
+          script.src = `https://maps.googleapis.com/maps/api/js?key=${config.apiKey}&libraries=places,geometry`;
           script.async = true;
           script.defer = true;
           script.onload = initMap;
@@ -106,15 +106,83 @@ export function MapView({ itinerary, isLoading }: MapViewProps) {
       }
     });
 
-    // Create a simple connecting polyline (fast rendering)
+    // Use Routes API for accurate driving routes
     if (routeCoordinates.length > 1) {
-      new window.google.maps.Polyline({
-        path: routeCoordinates,
-        geodesic: true,
-        strokeColor: '#4285F4', // Google's blue color
-        strokeOpacity: 0.8,
-        strokeWeight: 3,
-        map: googleMapRef.current,
+      // Create waypoints for Routes API
+      const waypoints = routeCoordinates.slice(1, -1).map(coord => ({
+        location: {
+          latLng: {
+            latitude: coord.lat(),
+            longitude: coord.lng()
+          }
+        },
+        via: false
+      }));
+
+      const routeRequest = {
+        origin: {
+          location: {
+            latLng: {
+              latitude: routeCoordinates[0].lat(),
+              longitude: routeCoordinates[0].lng()
+            }
+          }
+        },
+        destination: {
+          location: {
+            latLng: {
+              latitude: routeCoordinates[routeCoordinates.length - 1].lat(),
+              longitude: routeCoordinates[routeCoordinates.length - 1].lng()
+            }
+          }
+        },
+        intermediates: waypoints,
+        travelMode: 'DRIVE',
+        routingPreference: 'TRAFFIC_UNAWARE',
+        computeAlternativeRoutes: false,
+        routeModifiers: {
+          avoidTolls: false,
+          avoidHighways: false,
+          avoidFerries: false
+        }
+      };
+
+      // Call Routes API through our backend
+      fetch('/api/routes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(routeRequest)
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.routes && data.routes.length > 0) {
+          // Decode the polyline and display it
+          const route = data.routes[0];
+          if (route.polyline && route.polyline.encodedPolyline) {
+            const decodedPath = window.google.maps.geometry.encoding.decodePath(route.polyline.encodedPolyline);
+            
+            new window.google.maps.Polyline({
+              path: decodedPath,
+              geodesic: true,
+              strokeColor: '#4285F4',
+              strokeOpacity: 0.8,
+              strokeWeight: 4,
+              map: googleMapRef.current,
+            });
+          }
+        }
+      })
+      .catch(error => {
+        console.log('Routes API not available, using simple polyline');
+        // Fallback to simple polyline
+        new window.google.maps.Polyline({
+          path: routeCoordinates,
+          geodesic: true,
+          strokeColor: '#4285F4',
+          strokeOpacity: 0.8,
+          strokeWeight: 3,
+          map: googleMapRef.current,
+        });
       });
     }
 
