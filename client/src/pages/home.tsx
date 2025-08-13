@@ -28,13 +28,44 @@ export default function Home() {
         description: `Your ${trip.itinerary?.totalDays}-day road trip is ready to explore.`,
       });
     },
-    onError: (error) => {
+    onError: (error: any) => {
       console.error("Failed to plan trip:", error);
-      toast({
-        title: "Trip Planning Failed",
-        description: error instanceof Error ? error.message : "Unable to generate your trip itinerary. Please try again.",
-        variant: "destructive",
-      });
+      
+      // Enhanced error handling with specific guidance
+      let title = "Trip Planning Failed";
+      let description = "Unable to generate your trip itinerary. Please try again.";
+      
+      if (error?.response?.json) {
+        error.response.json().then((errorData: any) => {
+          if (errorData.message?.includes("quota")) {
+            title = "OpenAI API Quota Exceeded";
+            description = "Your OpenAI API key has reached its usage limit. Please check your billing and usage at https://platform.openai.com/usage";
+          } else if (errorData.message?.includes("authentication")) {
+            title = "API Authentication Error";
+            description = "Please verify your OpenAI API key is valid and properly configured.";
+          } else {
+            description = errorData.message || description;
+          }
+          
+          toast({
+            title,
+            description,
+            variant: "destructive",
+          });
+        }).catch(() => {
+          toast({
+            title,
+            description,
+            variant: "destructive",
+          });
+        });
+      } else {
+        toast({
+          title,
+          description,
+          variant: "destructive",
+        });
+      }
     },
   });
 

@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { planTripSchema } from "@shared/schema";
 import { generateTripItinerary } from "./services/openai";
+
 import { geocodeItinerary } from "./services/maps";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -52,9 +53,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
           status: "failed",
         });
 
+        // Provide specific error messages for common OpenAI issues
+        let errorMessage = "Failed to generate trip itinerary";
+        let userMessage = "Unknown error";
+        
+        if (error instanceof Error) {
+          if (error.message.includes("exceeded your current quota")) {
+            errorMessage = "OpenAI API quota exceeded";
+            userMessage = "Your OpenAI API key has exceeded its usage quota. Please check your OpenAI billing and usage limits at https://platform.openai.com/usage";
+          } else if (error.message.includes("401") || error.message.includes("authentication")) {
+            errorMessage = "OpenAI API authentication failed";
+            userMessage = "Please check that your OpenAI API key is valid and has the correct permissions";
+          } else if (error.message.includes("rate limit")) {
+            errorMessage = "OpenAI API rate limit exceeded";
+            userMessage = "Too many requests to OpenAI API. Please wait a moment and try again";
+          } else {
+            userMessage = error.message;
+          }
+        }
+
         res.status(500).json({ 
-          error: "Failed to generate trip itinerary",
-          message: error instanceof Error ? error.message : "Unknown error"
+          error: errorMessage,
+          message: userMessage
         });
       }
     } catch (error) {
