@@ -63,16 +63,42 @@ export function TripForm({ onSubmit, isLoading, completedTrip }: TripFormProps) 
                 <MapPin className="h-4 w-4 text-emerald-600 mr-2" />
                 Start Location
               </Label>
-              <Input
-                id="startLocation"
-                type="text"
-                placeholder="e.g., San Francisco, CA"
-                value={formData.startLocation}
-                onChange={(e) => handleInputChange("startLocation", e.target.value)}
-                required
+              <Select 
+                value={formData.startLocation} 
+                onValueChange={(value) => handleInputChange("startLocation", value)}
                 disabled={isLoading}
-                data-testid="input-start-location"
-              />
+              >
+                <SelectTrigger data-testid="select-start-location">
+                  <SelectValue placeholder="Select start location" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="New York, NY">New York, NY</SelectItem>
+                  <SelectItem value="Los Angeles, CA">Los Angeles, CA</SelectItem>
+                  <SelectItem value="Chicago, IL">Chicago, IL</SelectItem>
+                  <SelectItem value="Houston, TX">Houston, TX</SelectItem>
+                  <SelectItem value="Phoenix, AZ">Phoenix, AZ</SelectItem>
+                  <SelectItem value="Philadelphia, PA">Philadelphia, PA</SelectItem>
+                  <SelectItem value="San Antonio, TX">San Antonio, TX</SelectItem>
+                  <SelectItem value="San Diego, CA">San Diego, CA</SelectItem>
+                  <SelectItem value="Dallas, TX">Dallas, TX</SelectItem>
+                  <SelectItem value="San Jose, CA">San Jose, CA</SelectItem>
+                  <SelectItem value="Austin, TX">Austin, TX</SelectItem>
+                  <SelectItem value="Jacksonville, FL">Jacksonville, FL</SelectItem>
+                  <SelectItem value="Fort Worth, TX">Fort Worth, TX</SelectItem>
+                  <SelectItem value="Columbus, OH">Columbus, OH</SelectItem>
+                  <SelectItem value="San Francisco, CA">San Francisco, CA</SelectItem>
+                  <SelectItem value="Charlotte, NC">Charlotte, NC</SelectItem>
+                  <SelectItem value="Indianapolis, IN">Indianapolis, IN</SelectItem>
+                  <SelectItem value="Seattle, WA">Seattle, WA</SelectItem>
+                  <SelectItem value="Denver, CO">Denver, CO</SelectItem>
+                  <SelectItem value="Boston, MA">Boston, MA</SelectItem>
+                  <SelectItem value="Nashville, TN">Nashville, TN</SelectItem>
+                  <SelectItem value="Miami, FL">Miami, FL</SelectItem>
+                  <SelectItem value="Las Vegas, NV">Las Vegas, NV</SelectItem>
+                  <SelectItem value="Portland, OR">Portland, OR</SelectItem>
+                  <SelectItem value="Atlanta, GA">Atlanta, GA</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             
             <div>
@@ -80,16 +106,42 @@ export function TripForm({ onSubmit, isLoading, completedTrip }: TripFormProps) 
                 <Flag className="h-4 w-4 text-red-600 mr-2" />
                 End Location
               </Label>
-              <Input
-                id="endLocation"
-                type="text"
-                placeholder="e.g., Los Angeles, CA"
-                value={formData.endLocation}
-                onChange={(e) => handleInputChange("endLocation", e.target.value)}
-                required
+              <Select 
+                value={formData.endLocation} 
+                onValueChange={(value) => handleInputChange("endLocation", value)}
                 disabled={isLoading}
-                data-testid="input-end-location"
-              />
+              >
+                <SelectTrigger data-testid="select-end-location">
+                  <SelectValue placeholder="Select end location" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="New York, NY">New York, NY</SelectItem>
+                  <SelectItem value="Los Angeles, CA">Los Angeles, CA</SelectItem>
+                  <SelectItem value="Chicago, IL">Chicago, IL</SelectItem>
+                  <SelectItem value="Houston, TX">Houston, TX</SelectItem>
+                  <SelectItem value="Phoenix, AZ">Phoenix, AZ</SelectItem>
+                  <SelectItem value="Philadelphia, PA">Philadelphia, PA</SelectItem>
+                  <SelectItem value="San Antonio, TX">San Antonio, TX</SelectItem>
+                  <SelectItem value="San Diego, CA">San Diego, CA</SelectItem>
+                  <SelectItem value="Dallas, TX">Dallas, TX</SelectItem>
+                  <SelectItem value="San Jose, CA">San Jose, CA</SelectItem>
+                  <SelectItem value="Austin, TX">Austin, TX</SelectItem>
+                  <SelectItem value="Jacksonville, FL">Jacksonville, FL</SelectItem>
+                  <SelectItem value="Fort Worth, TX">Fort Worth, TX</SelectItem>
+                  <SelectItem value="Columbus, OH">Columbus, OH</SelectItem>
+                  <SelectItem value="San Francisco, CA">San Francisco, CA</SelectItem>
+                  <SelectItem value="Charlotte, NC">Charlotte, NC</SelectItem>
+                  <SelectItem value="Indianapolis, IN">Indianapolis, IN</SelectItem>
+                  <SelectItem value="Seattle, WA">Seattle, WA</SelectItem>
+                  <SelectItem value="Denver, CO">Denver, CO</SelectItem>
+                  <SelectItem value="Boston, MA">Boston, MA</SelectItem>
+                  <SelectItem value="Nashville, TN">Nashville, TN</SelectItem>
+                  <SelectItem value="Miami, FL">Miami, FL</SelectItem>
+                  <SelectItem value="Las Vegas, NV">Las Vegas, NV</SelectItem>
+                  <SelectItem value="Portland, OR">Portland, OR</SelectItem>
+                  <SelectItem value="Atlanta, GA">Atlanta, GA</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
