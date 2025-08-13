@@ -153,6 +153,28 @@ export function MapView({ itinerary, isLoading }: MapViewProps) {
     );
   }
 
+  // Show message if geocoding failed but itinerary exists
+  if (itinerary && (itinerary as any).geocodingStatus === 'failed') {
+    return (
+      <div className="flex-1 relative">
+        <div className="w-full h-full bg-gray-100">
+          <div className="flex items-center justify-center h-full">
+            <div className="text-center text-gray-500 max-w-md mx-auto p-6">
+              <MapPin className="h-16 w-16 mb-4 text-gray-300 mx-auto" />
+              <h3 className="text-lg font-medium mb-2" data-testid="text-map-unavailable">Map Display Unavailable</h3>
+              <p className="text-sm mb-4" data-testid="text-map-explanation">
+                Your itinerary was generated successfully, but the map cannot be displayed due to Google Maps API configuration issues.
+              </p>
+              <p className="text-xs text-gray-400">
+                Check the Itinerary Details tab to view your complete trip plan.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex-1 relative">
       {isLoading && <LoadingState />}

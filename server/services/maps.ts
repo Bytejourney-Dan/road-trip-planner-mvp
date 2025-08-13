@@ -59,6 +59,7 @@ export async function geocodeItinerary(itinerary: any) {
     });
     
     const geocodedLocations = new Map<string, GeocodeResult>();
+    let geocodingErrors = 0;
     
     // Geocode each unique location
     for (const location of Array.from(locationsToGeocode)) {
@@ -67,13 +68,21 @@ export async function geocodeItinerary(itinerary: any) {
         geocodedLocations.set(location, result);
       } catch (error) {
         console.warn(`Failed to geocode ${location}:`, error);
+        geocodingErrors++;
         // Continue with other locations if one fails
       }
     }
     
+    // If all geocoding failed, add a note to the itinerary
+    const hasCoordinates = geocodedLocations.size > 0;
+    
     // Add coordinates to the itinerary
     const enhancedItinerary = {
       ...itinerary,
+      geocodingStatus: hasCoordinates ? 'partial' : 'failed',
+      geocodingNote: hasCoordinates 
+        ? `${geocodingErrors} locations could not be geocoded due to API restrictions`
+        : 'Map display unavailable - Google Maps API configuration required',
       days: itinerary.days.map((day: any) => ({
         ...day,
         route: {
@@ -88,7 +97,11 @@ export async function geocodeItinerary(itinerary: any) {
     return enhancedItinerary;
   } catch (error) {
     console.error("Error geocoding itinerary:", error);
-    // Return original itinerary if geocoding fails
-    return itinerary;
+    // Return original itinerary with error note if geocoding completely fails
+    return {
+      ...itinerary,
+      geocodingStatus: 'failed',
+      geocodingNote: 'Map display unavailable - Google Maps API configuration required'
+    };
   }
 }
