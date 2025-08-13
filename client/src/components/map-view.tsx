@@ -1,5 +1,5 @@
-import { useEffect, useRef } from "react";
-import { MapPin, Camera, Bed, ZoomIn, ZoomOut, Maximize } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { MapPin, Camera, Bed, ZoomIn, ZoomOut, Maximize, X, Navigation, Clock } from "lucide-react";
 import { TripItinerary } from "@/types/trip";
 import { LoadingState } from "./loading-state";
 
@@ -14,11 +14,28 @@ interface MapViewProps {
   isLoading: boolean;
 }
 
+interface LocationInfo {
+  type: 'start' | 'overnight' | 'end';
+  name: string;
+  dayNumber?: number;
+  date?: string;
+  attractions?: Array<{ name: string; description: string }>;
+  route?: {
+    from: string;
+    to: string;
+    distance: number;
+    drivingTime: string;
+    departureTime: string;
+    arrivalTime: string;
+  };
+}
+
 export function MapView({ itinerary, isLoading }: MapViewProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const googleMapRef = useRef<any | null>(null);
   const markersRef = useRef<any[]>([]);
   const polylinesRef = useRef<any[]>([]);
+  const [selectedLocation, setSelectedLocation] = useState<LocationInfo | null>(null);
 
   useEffect(() => {
     if (!mapRef.current) return;
@@ -58,6 +75,9 @@ export function MapView({ itinerary, isLoading }: MapViewProps) {
 
   useEffect(() => {
     if (!googleMapRef.current || !itinerary) return;
+
+    // Clear selected location when new itinerary loads
+    setSelectedLocation(null);
 
     // Add a small delay to ensure the map is ready
     const timer = setTimeout(() => {
@@ -100,6 +120,18 @@ export function MapView({ itinerary, isLoading }: MapViewProps) {
           // Use default Google Maps pin - no custom icon for better performance
         });
 
+        // Add click handler for overnight location
+        marker.addListener('click', () => {
+          setSelectedLocation({
+            type: 'overnight',
+            name: day.overnightLocation,
+            dayNumber: day.dayNumber,
+            date: day.date,
+            attractions: day.attractions,
+            route: day.route
+          });
+        });
+
         markers.push(marker);
         markersRef.current.push(marker);
         bounds.extend(marker.getPosition()!);
@@ -115,6 +147,18 @@ export function MapView({ itinerary, isLoading }: MapViewProps) {
           title: `Start: ${day.route.from}`,
           label: 'A', // Use Google's built-in letter labels
         });
+
+        // Add click handler for start location
+        startMarker.addListener('click', () => {
+          setSelectedLocation({
+            type: 'start',
+            name: day.route.from,
+            dayNumber: day.dayNumber,
+            date: day.date,
+            route: day.route
+          });
+        });
+
         markers.push(startMarker);
         markersRef.current.push(startMarker);
         bounds.extend(startMarker.getPosition()!);
@@ -127,6 +171,17 @@ export function MapView({ itinerary, isLoading }: MapViewProps) {
           title: `End: ${day.route.to}`,
           label: 'B', // Use Google's built-in letter labels
         });
+
+        // Add click handler for end location
+        endMarker.addListener('click', () => {
+          setSelectedLocation({
+            type: 'end',
+            name: day.route.to,
+            dayNumber: day.dayNumber,
+            date: day.date
+          });
+        });
+
         markers.push(endMarker);
         markersRef.current.push(endMarker);
         bounds.extend(endMarker.getPosition()!);
@@ -253,11 +308,15 @@ export function MapView({ itinerary, isLoading }: MapViewProps) {
   }
 
   return (
-    <div className="flex-1 relative">
+    <div className="flex-1 relative flex">
       {isLoading && <LoadingState />}
       
       {/* Google Maps Container - always visible */}
-      <div ref={mapRef} className="w-full h-full bg-gray-100" data-testid="map-container" />
+      <div 
+        ref={mapRef} 
+        className={`bg-gray-100 transition-all duration-300 ${selectedLocation ? 'w-2/3' : 'w-full'} h-full`} 
+        data-testid="map-container" 
+      />
 
       {/* Empty State Overlay - only when no trip is planned */}
       {showEmptyState && (
@@ -267,6 +326,98 @@ export function MapView({ itinerary, isLoading }: MapViewProps) {
             <h3 className="text-lg font-medium mb-2 text-gray-900" data-testid="text-empty-state">Ready to Plan Your Adventure?</h3>
             <p className="text-sm text-gray-600" data-testid="text-empty-instructions">Fill out the trip details and click "Generate Trip Plan" to see your route on this map</p>
           </div>
+        </div>
+      )}
+
+      {/* Location Info Side Panel */}
+      {selectedLocation && (
+        <div className="w-1/3 bg-white border-l border-gray-200 p-6 overflow-y-auto" data-testid="location-info-panel">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-gray-900" data-testid="text-location-title">
+              {selectedLocation.type === 'start' && 'Trip Start'}
+              {selectedLocation.type === 'overnight' && `Day ${selectedLocation.dayNumber} Stop`}
+              {selectedLocation.type === 'end' && 'Trip End'}
+            </h3>
+            <button
+              onClick={() => setSelectedLocation(null)}
+              className="p-1 hover:bg-gray-100 rounded"
+              data-testid="button-close-panel"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+
+          {/* Location Name */}
+          <div className="mb-4">
+            <div className="flex items-center mb-2">
+              <MapPin className="h-4 w-4 text-primary mr-2" />
+              <span className="font-medium text-gray-900" data-testid="text-location-name">{selectedLocation.name}</span>
+            </div>
+            {selectedLocation.date && (
+              <p className="text-sm text-gray-600" data-testid="text-location-date">{selectedLocation.date}</p>
+            )}
+          </div>
+
+          {/* Route Information */}
+          {selectedLocation.route && (
+            <div className="mb-4 p-4 bg-gray-50 rounded-lg">
+              <h4 className="font-medium text-gray-900 mb-2 flex items-center">
+                <Navigation className="h-4 w-4 mr-2" />
+                Route Details
+              </h4>
+              <div className="space-y-2 text-sm">
+                <p data-testid="text-route-from-to">
+                  <span className="text-gray-600">From:</span> {selectedLocation.route.from}<br />
+                  <span className="text-gray-600">To:</span> {selectedLocation.route.to}
+                </p>
+                <p data-testid="text-route-distance">
+                  <span className="text-gray-600">Distance:</span> {selectedLocation.route.distance} miles
+                </p>
+                <p data-testid="text-route-time">
+                  <span className="text-gray-600">Driving Time:</span> {selectedLocation.route.drivingTime}
+                </p>
+                <div className="flex items-center justify-between">
+                  <span data-testid="text-departure-time">
+                    <Clock className="h-3 w-3 inline mr-1" />
+                    Depart: {selectedLocation.route.departureTime}
+                  </span>
+                  <span data-testid="text-arrival-time">
+                    Arrive: {selectedLocation.route.arrivalTime}
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Attractions */}
+          {selectedLocation.attractions && selectedLocation.attractions.length > 0 && (
+            <div className="mb-4">
+              <h4 className="font-medium text-gray-900 mb-3 flex items-center">
+                <Camera className="h-4 w-4 mr-2" />
+                Nearby Attractions
+              </h4>
+              <div className="space-y-3">
+                {selectedLocation.attractions.map((attraction, index) => (
+                  <div key={index} className="p-3 bg-gray-50 rounded-lg" data-testid={`attraction-${index}`}>
+                    <h5 className="font-medium text-gray-900 mb-1" data-testid={`attraction-name-${index}`}>
+                      {attraction.name}
+                    </h5>
+                    <p className="text-sm text-gray-600" data-testid={`attraction-description-${index}`}>
+                      {attraction.description}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Overnight Location Icon */}
+          {selectedLocation.type === 'overnight' && (
+            <div className="mt-4 p-3 bg-blue-50 rounded-lg flex items-center">
+              <Bed className="h-4 w-4 text-blue-600 mr-2" />
+              <span className="text-sm text-blue-800" data-testid="text-overnight-indicator">Overnight stay location</span>
+            </div>
+          )}
         </div>
       )}
 
