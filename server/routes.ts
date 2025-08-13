@@ -60,6 +60,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         startTime: planRequest.startTime,
         endDate: new Date(planRequest.endDate),
         checkInTime: planRequest.checkInTime,
+        isRoundTrip: planRequest.isRoundTrip || "false",
         interests: planRequest.interests || null,
       });
 
@@ -72,6 +73,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           startTime: planRequest.startTime,
           endDate: planRequest.endDate,
           checkInTime: planRequest.checkInTime,
+          isRoundTrip: planRequest.isRoundTrip,
           interests: planRequest.interests || undefined,
         });
 

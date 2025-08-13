@@ -11,6 +11,7 @@ export const trips = pgTable("trips", {
   startTime: text("start_time").notNull(),
   endDate: timestamp("end_date").notNull(),
   checkInTime: text("check_in_time").notNull(),
+  isRoundTrip: varchar("is_round_trip").notNull().default("false"),
 
   interests: text("interests").array(),
   itinerary: jsonb("itinerary"),
@@ -28,6 +29,7 @@ export const insertTripSchema = createInsertSchema(trips).omit({
 export const planTripSchema = insertTripSchema.extend({
   startDate: z.string(),
   endDate: z.string(),
+  isRoundTrip: z.string().default("false"),
 });
 
 export type InsertTrip = z.infer<typeof insertTripSchema>;

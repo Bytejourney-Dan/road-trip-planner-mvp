@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Switch } from "@/components/ui/switch";
 import { MapPin, Flag, Clock, Sparkles, CheckCircle, ChevronDown } from "lucide-react";
 import { TripFormData, Trip } from "@/types/trip";
 
@@ -24,6 +25,7 @@ export function TripForm({ onSubmit, isLoading, completedTrip }: TripFormProps) 
     endDate: "",
     checkInTime: "22:00",
     interests: [],
+    isRoundTrip: "false",
   });
 
   const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
@@ -218,6 +220,31 @@ export function TripForm({ onSubmit, isLoading, completedTrip }: TripFormProps) 
                 </div>
               )}
             </div>
+          </div>
+        </div>
+
+        {/* Roundtrip Toggle */}
+        <div className="glass-light p-4 rounded-xl">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-600 rounded-lg flex items-center justify-center">
+                <Sparkles className="h-4 w-4 text-white" />
+              </div>
+              <div>
+                <Label htmlFor="roundtrip" className="text-sm font-semibold text-gray-800 cursor-pointer">
+                  Roundtrip
+                </Label>
+                <p className="text-xs text-gray-600">Return to starting location</p>
+              </div>
+            </div>
+            <Switch
+              id="roundtrip"
+              checked={formData.isRoundTrip === "true"}
+              onCheckedChange={(checked) => handleInputChange("isRoundTrip", checked ? "true" : "false")}
+              disabled={isLoading}
+              data-testid="switch-roundtrip"
+              className="data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-purple-500 data-[state=checked]:to-pink-600"
+            />
           </div>
         </div>
 

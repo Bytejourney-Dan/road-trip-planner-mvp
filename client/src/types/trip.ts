@@ -6,6 +6,7 @@ export interface TripFormData {
   endDate: string;
   checkInTime: string;
   interests?: string[];
+  isRoundTrip: string;
 }
 
 export interface TripItinerary {
@@ -64,6 +65,7 @@ export interface Trip {
   endDate: string;
   checkInTime: string;
   interests?: string[];
+  isRoundTrip: string;
   itinerary?: TripItinerary;
   status: "pending" | "completed" | "failed";
   createdAt: string;

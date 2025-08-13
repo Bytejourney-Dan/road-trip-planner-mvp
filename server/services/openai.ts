@@ -12,11 +12,14 @@ export interface TripPlanningRequest {
   startTime: string;
   endDate: string;
   checkInTime: string;
+  isRoundTrip?: string;
 
   interests?: string[];
 }
 
 export async function generateTripItinerary(request: TripPlanningRequest) {
+  const isRoundTrip = request.isRoundTrip === "true";
+  
   const prompt = `You are a professional trip planner specializing in road trips.
 
 Using the trip details provided, create a realistic, day-by-day driving itinerary.
@@ -28,6 +31,7 @@ Trip Details:
 - Start Date: ${request.startDate} at ${request.startTime}
 - End Date: ${request.endDate}
 - Latest check-in time: ${request.checkInTime}
+- Trip Type: ${isRoundTrip ? 'Round Trip (return to starting location)' : 'One Way'}
 
 ${request.interests && request.interests.length > 0 ? `- Interests: ${request.interests.join(', ')}` : ''}
 
@@ -38,6 +42,7 @@ Rules:
 - Keep the total number of stops (including start, overnights, destination, and attractions) at or below 25
 - Ensure realistic driving times and distances
 - Include estimated driving times between cities
+${isRoundTrip ? '- For round trips: plan the outbound journey to the destination, then plan the return journey back to the starting location within the given dates' : ''}
 
 
 Return the plan in STRICT JSON format with this exact structure:
