@@ -35,7 +35,10 @@ Trip Details:
 
 ${request.interests && request.interests.length > 0 ? `- Travel Interests: ${request.interests.join(', ')}
 
-When selecting attractions, include a variety of places that match the traveler's interests. Ensure all selected interest categories are represented in the attractions throughout the trip.` : ''}
+IMPORTANT: The itinerary MUST include attractions from ALL selected interest categories. For each interest category selected:
+${request.interests.map(interest => `- ${interest}: Include specific attractions of this type`).join('\n')}
+
+Distribute these interest-based attractions across different days of the trip to ensure variety.` : ''}
 
 Rules:
 - Assume travel is by car
