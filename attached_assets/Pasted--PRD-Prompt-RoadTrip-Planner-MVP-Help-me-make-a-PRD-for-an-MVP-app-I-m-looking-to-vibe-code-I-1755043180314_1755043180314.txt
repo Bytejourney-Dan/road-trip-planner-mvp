@@ -1,0 +1,37 @@
+ 
+PRD Prompt – RoadTrip Planner MVP
+Help me make a PRD for an MVP app I’m looking to vibe code.
+I’m looking for a web-based road trip planner where a user inputs trip details (start/end location, dates, etc.) and gets back a day-by-day itinerary from ChatGPT. This itinerary should include cities/towns for overnight stays and popular attractions along the way. The trip is then visualized on Google Maps with the route highlighted, markers for each stop, and a simple itinerary summary.
+User should be able to enter details like:
+•	Start location & end location
+•	Start date and time & end date, as well as the latest time to check in.
+The app should send the details to ChatGPT for trip generation, parse the returned JSON, and then use Google Places API and Google Routes API v2 to geocode stops and draw the route. Finally, it should show both:
+•	A Google Map view of the route and pins for stops/attractions
+•	An itinerary table showing each day’s route, estimated driving time, and attractions
+Sample Prompt to send to ChatGPT:
+You are a professional trip planner specializing in road trips.  
+Using the trip details provided, create a realistic, day-by-day driving itinerary.  
+Include cities or towns for overnight stays and up to 5 most popular attractions near each overnight city or along the route.
+
+Rules:  
+- Assume travel is by car.  
+- Day 1 starts at the provided start date/time.  
+- All subsequent days start at 9:00 AM local time.  
+- Keep the total number of stops (including start, overnights, destination, and attractions) at or below 25.  
+- Return the plan in STRICT JSON with this format
+
+We should think through the following questions:
+What is the app?
+A lightweight MVP road trip planner that uses AI to design and map a complete trip plan, ready for visualization.
+How do I use the app?
+Fill out the trip form → click “Plan Trip” → see an automatically generated and mapped itinerary.
+What are the patterns behind the app?
+1.	Gather user trip constraints.
+2.	Feed them to ChatGPT with a strict JSON prompt.
+3.	Parse itinerary JSON and geocode all stops.
+4.	Use Google Maps APIs to draw the route, calculate distances/times, and place pins.
+5.	Present both a visual map and a daily breakdown.
+How do I excel at using the app?
+Provide clear start/end locations, realistic daily driving limits, and interests to guide attraction selection. Review the AI-generated itinerary and adjust as needed for your preferences.
+I’ve also attached an example PRD that is well fleshed out as guidance.
+ 
