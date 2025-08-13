@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { MapPin, Camera, Bed, ZoomIn, ZoomOut, Maximize, X, Navigation, Clock } from "lucide-react";
+import { MapPin, Camera, Bed, ZoomIn, ZoomOut, Maximize, X, Navigation, Clock, CheckCircle } from "lucide-react";
 import { TripItinerary } from "@/types/trip";
 import { LoadingState } from "./loading-state";
 
@@ -337,6 +337,32 @@ export function MapView({ itinerary, isLoading }: MapViewProps) {
             <MapPin className="h-12 w-12 mb-3 text-blue-400 mx-auto animate-float" />
             <h3 className="text-base font-semibold mb-2 text-gray-900" data-testid="text-empty-state">Ready to Plan Your Adventure?</h3>
             <p className="text-sm text-gray-700" data-testid="text-empty-instructions">Fill out the trip details to see your route here</p>
+          </div>
+        </div>
+      )}
+
+      {/* Trip Summary Panel - appears when trip is generated */}
+      {itinerary && (
+        <div className="absolute top-4 left-4 z-50 animate-slide-up" data-testid="trip-summary">
+          <div className="glass-strong rounded-2xl p-4 max-w-xs">
+            <div className="flex items-center space-x-2 mb-3">
+              <CheckCircle className="h-5 w-5 text-emerald-500" />
+              <h3 className="font-semibold text-gray-900">Trip Generated!</h3>
+            </div>
+            <div className="text-sm text-gray-700 space-y-2">
+              <div data-testid="summary-days" className="flex items-center">
+                <span className="font-medium">{itinerary.totalDays}-day</span> 
+                <span className="ml-1">road trip</span>
+              </div>
+              <div data-testid="summary-distance" className="flex items-center">
+                <span className="font-medium">{itinerary.totalDistance} miles</span>
+                <span className="ml-1">total distance</span>
+              </div>
+              <div data-testid="summary-stops" className="flex items-center">
+                <span className="font-medium">{itinerary.days.length} stops</span>
+                <span className="ml-1">planned</span>
+              </div>
+            </div>
           </div>
         </div>
       )}

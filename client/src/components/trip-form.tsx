@@ -29,6 +29,7 @@ export function TripForm({ onSubmit, isLoading, completedTrip }: TripFormProps) 
   });
 
   const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
+  const [selectedNatureTypes, setSelectedNatureTypes] = useState<string[]>([]);
   const [startLocationInput, setStartLocationInput] = useState("");
   const [endLocationInput, setEndLocationInput] = useState("");
   const [showStartSuggestions, setShowStartSuggestions] = useState(false);
@@ -61,8 +62,38 @@ export function TripForm({ onSubmit, isLoading, completedTrip }: TripFormProps) 
       const newInterests = checked 
         ? [...prev, interest]
         : prev.filter(i => i !== interest);
-      handleInputChange("interests", newInterests);
+      
+      // Combine regular interests with nature types
+      const allInterests = [...newInterests];
+      if (selectedNatureTypes.length > 0 && newInterests.includes("Nature")) {
+        allInterests.push(`Nature: ${selectedNatureTypes.join(", ")}`);
+        // Remove the base "Nature" since we have specific types
+        const finalInterests = allInterests.filter(i => i !== "Nature");
+        handleInputChange("interests", finalInterests);
+      } else {
+        handleInputChange("interests", allInterests);
+      }
+      
       return newInterests;
+    });
+  };
+
+  const handleNatureTypeToggle = (natureType: string, checked: boolean) => {
+    setSelectedNatureTypes(prev => {
+      const newTypes = checked 
+        ? [...prev, natureType]
+        : prev.filter(t => t !== natureType);
+      
+      // Update the combined interests
+      const baseInterests = selectedInterests.filter(i => !i.startsWith("Nature:"));
+      const allInterests = [...baseInterests];
+      
+      if (newTypes.length > 0 && selectedInterests.includes("Nature")) {
+        allInterests.push(`Nature: ${newTypes.join(", ")}`);
+      }
+      
+      handleInputChange("interests", allInterests);
+      return newTypes;
     });
   };
 
@@ -349,36 +380,72 @@ export function TripForm({ onSubmit, isLoading, completedTrip }: TripFormProps) 
               <Label className="text-sm font-semibold text-gray-800">Travel Interests (Optional)</Label>
             </div>
             
-            <div className="grid grid-cols-2 gap-3 max-h-48 overflow-y-auto glass-scrollbar" data-testid="interests-checkboxes">
-              {[
-                "National parks and nature",
-                "Museums and culture", 
-                "Food and dining",
-                "Beaches and coast",
-                "Historic sites",
-                "Shopping",
-                "Adventure and outdoor activities",
-                "Art and galleries",
-                "Music and entertainment",
-                "Architecture"
-              ].map((interest) => (
-                <div key={interest} className="flex items-center space-x-2 p-2 rounded-lg hover:bg-white/30 transition-all duration-200 glass-hover">
-                  <Checkbox
-                    id={`interest-${interest}`}
-                    checked={selectedInterests.includes(interest)}
-                    onCheckedChange={(checked) => handleInterestToggle(interest, !!checked)}
-                    disabled={isLoading}
-                    data-testid={`checkbox-${interest.toLowerCase().replace(/\s+/g, '-')}`}
-                    className="border-white/30 data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-purple-500 data-[state=checked]:to-blue-500 data-[state=checked]:border-purple-400"
-                  />
-                  <Label 
-                    htmlFor={`interest-${interest}`}
-                    className="text-sm font-medium cursor-pointer text-gray-800 select-none"
-                  >
-                    {interest}
-                  </Label>
+            <div className="space-y-3 max-h-64 overflow-y-auto glass-scrollbar" data-testid="interests-checkboxes">
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  "National and State Parks",
+                  "Nature",
+                  "Beaches and coast",
+                  "Historic sites",
+                  "Adventure and outdoor activities",
+                  "Art and galleries",
+                  "Music and entertainment",
+                  "Architecture"
+                ].map((interest) => (
+                  <div key={interest} className="flex items-center space-x-2 p-2 rounded-lg hover:bg-white/30 transition-all duration-200 glass-hover">
+                    <Checkbox
+                      id={`interest-${interest}`}
+                      checked={selectedInterests.includes(interest)}
+                      onCheckedChange={(checked) => handleInterestToggle(interest, !!checked)}
+                      disabled={isLoading}
+                      data-testid={`checkbox-${interest.toLowerCase().replace(/\s+/g, '-')}`}
+                      className="border-white/30 data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-purple-500 data-[state=checked]:to-blue-500 data-[state=checked]:border-purple-400"
+                    />
+                    <Label 
+                      htmlFor={`interest-${interest}`}
+                      className="text-sm font-medium cursor-pointer text-gray-800 select-none"
+                    >
+                      {interest}
+                    </Label>
+                  </div>
+                ))}
+              </div>
+
+              {/* Nature Types Multi-Select Dropdown */}
+              {selectedInterests.includes("Nature") && (
+                <div className="glass-light p-3 rounded-lg">
+                  <Label className="text-xs font-semibold text-gray-700 mb-2 block">Nature Types</Label>
+                  <div className="grid grid-cols-2 gap-2 text-xs">
+                    {[
+                      "Waterfalls",
+                      "Desert",
+                      "Forest",
+                      "Mountains",
+                      "Lakes",
+                      "Rivers",
+                      "Canyons",
+                      "Hot Springs"
+                    ].map((natureType) => (
+                      <div key={natureType} className="flex items-center space-x-2 p-1 rounded hover:bg-white/20 transition-all duration-200">
+                        <Checkbox
+                          id={`nature-${natureType}`}
+                          checked={selectedNatureTypes.includes(natureType)}
+                          onCheckedChange={(checked) => handleNatureTypeToggle(natureType, !!checked)}
+                          disabled={isLoading}
+                          data-testid={`checkbox-nature-${natureType.toLowerCase()}`}
+                          className="border-white/30 data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-green-500 data-[state=checked]:to-emerald-500 data-[state=checked]:border-green-400 h-3 w-3"
+                        />
+                        <Label 
+                          htmlFor={`nature-${natureType}`}
+                          className="text-xs font-medium cursor-pointer text-gray-700 select-none"
+                        >
+                          {natureType}
+                        </Label>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              ))}
+              )}
             </div>
             
             {selectedInterests.length > 0 && (
@@ -410,30 +477,6 @@ export function TripForm({ onSubmit, isLoading, completedTrip }: TripFormProps) 
             )}
           </Button>
         </form>
-
-      {/* Trip Summary Card */}
-      {completedTrip?.itinerary && (
-        <div className="mt-6 glass-light rounded-xl p-4 animate-fade-in" data-testid="trip-summary">
-          <div className="flex items-center space-x-2 mb-3">
-            <CheckCircle className="h-5 w-5 text-emerald-500" />
-            <h3 className="font-semibold text-gray-900">Trip Generated!</h3>
-          </div>
-          <div className="text-sm text-gray-700 space-y-2">
-            <div data-testid="summary-days" className="flex items-center">
-              <span className="font-medium">{completedTrip.itinerary.totalDays}-day</span> 
-              <span className="ml-1">road trip</span>
-            </div>
-            <div data-testid="summary-distance" className="flex items-center">
-              <span className="font-medium">{completedTrip.itinerary.totalDistance} miles</span>
-              <span className="ml-1">total distance</span>
-            </div>
-            <div data-testid="summary-stops" className="flex items-center">
-              <span className="font-medium">{completedTrip.itinerary.days.length} stops</span>
-              <span className="ml-1">planned</span>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
