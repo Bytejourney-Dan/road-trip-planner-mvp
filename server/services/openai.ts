@@ -23,7 +23,9 @@ export async function generateTripItinerary(request: TripPlanningRequest) {
   const prompt = `You are a professional trip planner specializing in road trips.
 
 Using the trip details provided, create a realistic, day-by-day driving itinerary.
-Include cities or towns for overnight stays and up to 5 most popular attractions near each overnight city or along the route.
+Include cities or towns for overnight stays and exactly 5 attractions within 100 miles of each overnight city.
+
+IMPORTANT: The driving route should ONLY connect overnight stops - do not include attractions as waypoints in the driving directions.
 
 Trip Details:
 - Start: ${request.startLocation}
@@ -35,10 +37,13 @@ Trip Details:
 
 ${request.interests && request.interests.length > 0 ? `- Travel Interests: ${request.interests.join(', ')}
 
-CRITICAL REQUIREMENT: The itinerary MUST include attractions from EVERY selected interest category. No exceptions.
+CRITICAL REQUIREMENTS: 
+1. The itinerary MUST include attractions from EVERY selected interest category. No exceptions.
+2. Recommend exactly 5 attractions per day that are within 100 miles of the overnight stop for that day.
+3. Only include driving routes between overnight stops - do NOT route through attractions in the initial route.
 
 For each interest category selected:
-${request.interests.map(interest => `- ${interest}: MUST include at least one specific attraction of this type`).join('\n')}
+${request.interests.map(interest => `- ${interest}: MUST include specific attractions of this type within 100 miles of overnight stops`).join('\n')}
 
 Examples of what to include:
 - For "Beaches and coast": Include beaches, coastal viewpoints, seaside towns, coastal state parks, lighthouses, or oceanfront attractions
@@ -53,8 +58,10 @@ Rules:
 - Day 1 starts at the provided start date/time
 - All subsequent days start at 9:00 AM local time
 - Keep the total number of stops (including start, overnights, destination, and attractions) at or below 25
-- Ensure realistic driving times and distances
-- Include estimated driving times between cities
+- Ensure realistic driving times and distances between overnight stops only
+- Include estimated driving times between overnight cities
+- Include exactly 5 attractions per day that are within 100 miles of the overnight stop
+- The initial route should ONLY connect overnight stops - do not include attractions in the driving route
 - Include attractions that match the traveler's specified interests
 ${isRoundTrip ? '- For round trips: plan the outbound journey to the destination, then plan the return journey back to the starting location within the given dates' : ''}
 
@@ -79,8 +86,11 @@ Return the plan in STRICT JSON format with this exact structure:
       },
       "attractions": [
         {
-          "name": "string",
-          "description": "string"
+          "name": "string", 
+          "description": "string (within 100 miles of overnight stop)",
+          "coordinates": {"lat": number, "lng": number},
+          "estimatedDuration": "string (e.g., '2h')",
+          "category": "string (from user interests)"
         }
       ],
       "overnightLocation": "string"
