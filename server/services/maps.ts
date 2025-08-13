@@ -7,6 +7,10 @@ export interface GeocodeResult {
 export async function geocodeLocation(location: string): Promise<GeocodeResult> {
   const apiKey = process.env.GOOGLE_MAPS_SERVER_API_KEY;
   
+  if (!apiKey) {
+    throw new Error("Google Maps Server API key is not configured");
+  }
+  
   try {
     const response = await fetch(
       `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(location)}&key=${apiKey}`
@@ -18,8 +22,16 @@ export async function geocodeLocation(location: string): Promise<GeocodeResult> 
     
     const data = await response.json();
     
+    if (data.status === 'REQUEST_DENIED') {
+      throw new Error(`Google Maps API request denied. Please check your API key permissions and billing.`);
+    }
+    
+    if (data.status === 'INVALID_REQUEST') {
+      throw new Error(`Invalid geocoding request for location: ${location}`);
+    }
+    
     if (data.status !== 'OK' || !data.results?.length) {
-      throw new Error(`Failed to geocode location: ${location}`);
+      throw new Error(`Failed to geocode location: ${location}. Status: ${data.status}`);
     }
     
     const result = data.results[0];

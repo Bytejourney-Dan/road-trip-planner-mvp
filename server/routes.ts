@@ -53,7 +53,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           status: "failed",
         });
 
-        // Provide specific error messages for common OpenAI issues
+        // Provide specific error messages for common API issues
         let errorMessage = "Failed to generate trip itinerary";
         let userMessage = "Unknown error";
         
@@ -67,6 +67,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           } else if (error.message.includes("rate limit")) {
             errorMessage = "OpenAI API rate limit exceeded";
             userMessage = "Too many requests to OpenAI API. Please wait a moment and try again";
+          } else if (error.message.includes("Google Maps API") || error.message.includes("geocode")) {
+            errorMessage = "Google Maps API error";
+            userMessage = "Google Maps API key issue detected. Please verify your Google Maps Server API key is valid and has Geocoding API enabled";
           } else {
             userMessage = error.message;
           }
