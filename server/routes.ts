@@ -7,6 +7,13 @@ import { generateTripItinerary } from "./services/openai";
 import { geocodeItinerary } from "./services/maps";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Serve Google Maps API key to frontend
+  app.get("/api/config/maps-key", (req, res) => {
+    res.json({ 
+      apiKey: process.env.GOOGLE_MAPS_FRONTEND_API_KEY 
+    });
+  });
+
   // Plan a new trip
   app.post("/api/trips/plan", async (req, res) => {
     try {

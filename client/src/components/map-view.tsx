@@ -34,12 +34,22 @@ export function MapView({ itinerary, isLoading }: MapViewProps) {
 
     // Load Google Maps script if not already loaded
     if (!window.google) {
-      const script = document.createElement('script');
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${import.meta.env.VITE_GOOGLE_MAPS_FRONTEND_API_KEY}&libraries=places`;
-      script.async = true;
-      script.defer = true;
-      script.onload = initMap;
-      document.head.appendChild(script);
+      // Fetch API key from server
+      fetch('/api/config/maps-key')
+        .then(response => response.json())
+        .then(config => {
+          console.log('Frontend API Key:', config.apiKey ? 'Present' : 'Missing');
+          
+          const script = document.createElement('script');
+          script.src = `https://maps.googleapis.com/maps/api/js?key=${config.apiKey}&libraries=places`;
+          script.async = true;
+          script.defer = true;
+          script.onload = initMap;
+          document.head.appendChild(script);
+        })
+        .catch(error => {
+          console.error('Failed to fetch Google Maps API key:', error);
+        });
     } else {
       initMap();
     }
