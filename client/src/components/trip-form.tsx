@@ -27,6 +27,10 @@ export function TripForm({ onSubmit, isLoading, completedTrip }: TripFormProps) 
   });
 
   const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
+  const [customStartLocation, setCustomStartLocation] = useState("");
+  const [customEndLocation, setCustomEndLocation] = useState("");
+  const [showCustomStart, setShowCustomStart] = useState(false);
+  const [showCustomEnd, setShowCustomEnd] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,6 +51,36 @@ export function TripForm({ onSubmit, isLoading, completedTrip }: TripFormProps) 
     });
   };
 
+  const handleStartLocationChange = (value: string) => {
+    if (value === "custom") {
+      setShowCustomStart(true);
+      handleInputChange("startLocation", customStartLocation);
+    } else {
+      setShowCustomStart(false);
+      handleInputChange("startLocation", value);
+    }
+  };
+
+  const handleEndLocationChange = (value: string) => {
+    if (value === "custom") {
+      setShowCustomEnd(true);
+      handleInputChange("endLocation", customEndLocation);
+    } else {
+      setShowCustomEnd(false);
+      handleInputChange("endLocation", value);
+    }
+  };
+
+  const handleCustomStartLocationChange = (value: string) => {
+    setCustomStartLocation(value);
+    handleInputChange("startLocation", value);
+  };
+
+  const handleCustomEndLocationChange = (value: string) => {
+    setCustomEndLocation(value);
+    handleInputChange("endLocation", value);
+  };
+
   return (
     <div className="w-full lg:w-80 bg-white border-r border-gray-200 overflow-y-auto">
       <div className="p-6">
@@ -63,42 +97,66 @@ export function TripForm({ onSubmit, isLoading, completedTrip }: TripFormProps) 
                 <MapPin className="h-4 w-4 text-emerald-600 mr-2" />
                 Start Location
               </Label>
-              <Select 
-                value={formData.startLocation} 
-                onValueChange={(value) => handleInputChange("startLocation", value)}
-                disabled={isLoading}
-              >
-                <SelectTrigger data-testid="select-start-location">
-                  <SelectValue placeholder="Select start location" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="New York, NY">New York, NY</SelectItem>
-                  <SelectItem value="Los Angeles, CA">Los Angeles, CA</SelectItem>
-                  <SelectItem value="Chicago, IL">Chicago, IL</SelectItem>
-                  <SelectItem value="Houston, TX">Houston, TX</SelectItem>
-                  <SelectItem value="Phoenix, AZ">Phoenix, AZ</SelectItem>
-                  <SelectItem value="Philadelphia, PA">Philadelphia, PA</SelectItem>
-                  <SelectItem value="San Antonio, TX">San Antonio, TX</SelectItem>
-                  <SelectItem value="San Diego, CA">San Diego, CA</SelectItem>
-                  <SelectItem value="Dallas, TX">Dallas, TX</SelectItem>
-                  <SelectItem value="San Jose, CA">San Jose, CA</SelectItem>
-                  <SelectItem value="Austin, TX">Austin, TX</SelectItem>
-                  <SelectItem value="Jacksonville, FL">Jacksonville, FL</SelectItem>
-                  <SelectItem value="Fort Worth, TX">Fort Worth, TX</SelectItem>
-                  <SelectItem value="Columbus, OH">Columbus, OH</SelectItem>
-                  <SelectItem value="San Francisco, CA">San Francisco, CA</SelectItem>
-                  <SelectItem value="Charlotte, NC">Charlotte, NC</SelectItem>
-                  <SelectItem value="Indianapolis, IN">Indianapolis, IN</SelectItem>
-                  <SelectItem value="Seattle, WA">Seattle, WA</SelectItem>
-                  <SelectItem value="Denver, CO">Denver, CO</SelectItem>
-                  <SelectItem value="Boston, MA">Boston, MA</SelectItem>
-                  <SelectItem value="Nashville, TN">Nashville, TN</SelectItem>
-                  <SelectItem value="Miami, FL">Miami, FL</SelectItem>
-                  <SelectItem value="Las Vegas, NV">Las Vegas, NV</SelectItem>
-                  <SelectItem value="Portland, OR">Portland, OR</SelectItem>
-                  <SelectItem value="Atlanta, GA">Atlanta, GA</SelectItem>
-                </SelectContent>
-              </Select>
+              {!showCustomStart ? (
+                <Select 
+                  value={formData.startLocation} 
+                  onValueChange={handleStartLocationChange}
+                  disabled={isLoading}
+                >
+                  <SelectTrigger data-testid="select-start-location">
+                    <SelectValue placeholder="Select start location" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="custom">✏️ Type custom location</SelectItem>
+                    <SelectItem value="New York, NY">New York, NY</SelectItem>
+                    <SelectItem value="Los Angeles, CA">Los Angeles, CA</SelectItem>
+                    <SelectItem value="Chicago, IL">Chicago, IL</SelectItem>
+                    <SelectItem value="Houston, TX">Houston, TX</SelectItem>
+                    <SelectItem value="Phoenix, AZ">Phoenix, AZ</SelectItem>
+                    <SelectItem value="Philadelphia, PA">Philadelphia, PA</SelectItem>
+                    <SelectItem value="San Antonio, TX">San Antonio, TX</SelectItem>
+                    <SelectItem value="San Diego, CA">San Diego, CA</SelectItem>
+                    <SelectItem value="Dallas, TX">Dallas, TX</SelectItem>
+                    <SelectItem value="San Jose, CA">San Jose, CA</SelectItem>
+                    <SelectItem value="Austin, TX">Austin, TX</SelectItem>
+                    <SelectItem value="Jacksonville, FL">Jacksonville, FL</SelectItem>
+                    <SelectItem value="Fort Worth, TX">Fort Worth, TX</SelectItem>
+                    <SelectItem value="Columbus, OH">Columbus, OH</SelectItem>
+                    <SelectItem value="San Francisco, CA">San Francisco, CA</SelectItem>
+                    <SelectItem value="Charlotte, NC">Charlotte, NC</SelectItem>
+                    <SelectItem value="Indianapolis, IN">Indianapolis, IN</SelectItem>
+                    <SelectItem value="Seattle, WA">Seattle, WA</SelectItem>
+                    <SelectItem value="Denver, CO">Denver, CO</SelectItem>
+                    <SelectItem value="Boston, MA">Boston, MA</SelectItem>
+                    <SelectItem value="Nashville, TN">Nashville, TN</SelectItem>
+                    <SelectItem value="Miami, FL">Miami, FL</SelectItem>
+                    <SelectItem value="Las Vegas, NV">Las Vegas, NV</SelectItem>
+                    <SelectItem value="Portland, OR">Portland, OR</SelectItem>
+                    <SelectItem value="Atlanta, GA">Atlanta, GA</SelectItem>
+                  </SelectContent>
+                </Select>
+              ) : (
+                <div className="space-y-2">
+                  <Input
+                    type="text"
+                    placeholder="e.g., Small Town, State or Address"
+                    value={customStartLocation}
+                    onChange={(e) => handleCustomStartLocationChange(e.target.value)}
+                    disabled={isLoading}
+                    data-testid="input-custom-start-location"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowCustomStart(false)}
+                    disabled={isLoading}
+                    className="text-xs"
+                  >
+                    ← Back to preset cities
+                  </Button>
+                </div>
+              )}
             </div>
             
             <div>
@@ -106,42 +164,66 @@ export function TripForm({ onSubmit, isLoading, completedTrip }: TripFormProps) 
                 <Flag className="h-4 w-4 text-red-600 mr-2" />
                 End Location
               </Label>
-              <Select 
-                value={formData.endLocation} 
-                onValueChange={(value) => handleInputChange("endLocation", value)}
-                disabled={isLoading}
-              >
-                <SelectTrigger data-testid="select-end-location">
-                  <SelectValue placeholder="Select end location" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="New York, NY">New York, NY</SelectItem>
-                  <SelectItem value="Los Angeles, CA">Los Angeles, CA</SelectItem>
-                  <SelectItem value="Chicago, IL">Chicago, IL</SelectItem>
-                  <SelectItem value="Houston, TX">Houston, TX</SelectItem>
-                  <SelectItem value="Phoenix, AZ">Phoenix, AZ</SelectItem>
-                  <SelectItem value="Philadelphia, PA">Philadelphia, PA</SelectItem>
-                  <SelectItem value="San Antonio, TX">San Antonio, TX</SelectItem>
-                  <SelectItem value="San Diego, CA">San Diego, CA</SelectItem>
-                  <SelectItem value="Dallas, TX">Dallas, TX</SelectItem>
-                  <SelectItem value="San Jose, CA">San Jose, CA</SelectItem>
-                  <SelectItem value="Austin, TX">Austin, TX</SelectItem>
-                  <SelectItem value="Jacksonville, FL">Jacksonville, FL</SelectItem>
-                  <SelectItem value="Fort Worth, TX">Fort Worth, TX</SelectItem>
-                  <SelectItem value="Columbus, OH">Columbus, OH</SelectItem>
-                  <SelectItem value="San Francisco, CA">San Francisco, CA</SelectItem>
-                  <SelectItem value="Charlotte, NC">Charlotte, NC</SelectItem>
-                  <SelectItem value="Indianapolis, IN">Indianapolis, IN</SelectItem>
-                  <SelectItem value="Seattle, WA">Seattle, WA</SelectItem>
-                  <SelectItem value="Denver, CO">Denver, CO</SelectItem>
-                  <SelectItem value="Boston, MA">Boston, MA</SelectItem>
-                  <SelectItem value="Nashville, TN">Nashville, TN</SelectItem>
-                  <SelectItem value="Miami, FL">Miami, FL</SelectItem>
-                  <SelectItem value="Las Vegas, NV">Las Vegas, NV</SelectItem>
-                  <SelectItem value="Portland, OR">Portland, OR</SelectItem>
-                  <SelectItem value="Atlanta, GA">Atlanta, GA</SelectItem>
-                </SelectContent>
-              </Select>
+              {!showCustomEnd ? (
+                <Select 
+                  value={formData.endLocation} 
+                  onValueChange={handleEndLocationChange}
+                  disabled={isLoading}
+                >
+                  <SelectTrigger data-testid="select-end-location">
+                    <SelectValue placeholder="Select end location" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="custom">✏️ Type custom location</SelectItem>
+                    <SelectItem value="New York, NY">New York, NY</SelectItem>
+                    <SelectItem value="Los Angeles, CA">Los Angeles, CA</SelectItem>
+                    <SelectItem value="Chicago, IL">Chicago, IL</SelectItem>
+                    <SelectItem value="Houston, TX">Houston, TX</SelectItem>
+                    <SelectItem value="Phoenix, AZ">Phoenix, AZ</SelectItem>
+                    <SelectItem value="Philadelphia, PA">Philadelphia, PA</SelectItem>
+                    <SelectItem value="San Antonio, TX">San Antonio, TX</SelectItem>
+                    <SelectItem value="San Diego, CA">San Diego, CA</SelectItem>
+                    <SelectItem value="Dallas, TX">Dallas, TX</SelectItem>
+                    <SelectItem value="San Jose, CA">San Jose, CA</SelectItem>
+                    <SelectItem value="Austin, TX">Austin, TX</SelectItem>
+                    <SelectItem value="Jacksonville, FL">Jacksonville, FL</SelectItem>
+                    <SelectItem value="Fort Worth, TX">Fort Worth, TX</SelectItem>
+                    <SelectItem value="Columbus, OH">Columbus, OH</SelectItem>
+                    <SelectItem value="San Francisco, CA">San Francisco, CA</SelectItem>
+                    <SelectItem value="Charlotte, NC">Charlotte, NC</SelectItem>
+                    <SelectItem value="Indianapolis, IN">Indianapolis, IN</SelectItem>
+                    <SelectItem value="Seattle, WA">Seattle, WA</SelectItem>
+                    <SelectItem value="Denver, CO">Denver, CO</SelectItem>
+                    <SelectItem value="Boston, MA">Boston, MA</SelectItem>
+                    <SelectItem value="Nashville, TN">Nashville, TN</SelectItem>
+                    <SelectItem value="Miami, FL">Miami, FL</SelectItem>
+                    <SelectItem value="Las Vegas, NV">Las Vegas, NV</SelectItem>
+                    <SelectItem value="Portland, OR">Portland, OR</SelectItem>
+                    <SelectItem value="Atlanta, GA">Atlanta, GA</SelectItem>
+                  </SelectContent>
+                </Select>
+              ) : (
+                <div className="space-y-2">
+                  <Input
+                    type="text"
+                    placeholder="e.g., Small Town, State or Address"
+                    value={customEndLocation}
+                    onChange={(e) => handleCustomEndLocationChange(e.target.value)}
+                    disabled={isLoading}
+                    data-testid="input-custom-end-location"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowCustomEnd(false)}
+                    disabled={isLoading}
+                    className="text-xs"
+                  >
+                    ← Back to preset cities
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
 
