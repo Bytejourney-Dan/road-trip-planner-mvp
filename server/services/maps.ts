@@ -84,14 +84,47 @@ export async function geocodeItinerary(itinerary: any) {
       geocodingNote: hasCoordinates 
         ? `${geocodingErrors} locations could not be geocoded due to API restrictions`
         : 'Map display unavailable - Google Maps API configuration required',
-      days: itinerary.days.map((day: any) => ({
-        ...day,
-        route: {
-          ...day.route,
-          fromCoordinates: geocodedLocations.get(day.route.from),
-          toCoordinates: geocodedLocations.get(day.route.to),
-        },
-        overnightCoordinates: geocodedLocations.get(day.overnightLocation),
+      days: await Promise.all(itinerary.days.map(async (day: any) => {
+        // Geocode attractions for this day
+        const geocodedAttractions = await Promise.all(
+          (day.attractions || []).map(async (attraction: any) => {
+            try {
+              // Try to geocode the attraction name with the overnight location for context
+              const attractionQuery = `${attraction.name}, ${day.overnightLocation}`;
+              const attractionCoords = await geocodeLocation(attractionQuery);
+              
+              return {
+                ...attraction,
+                coordinates: {
+                  lat: attractionCoords.lat,
+                  lng: attractionCoords.lng
+                }
+              };
+            } catch (error) {
+              console.warn(`Failed to geocode attraction ${attraction.name}:`, error);
+              // Fallback: place near overnight location with small offset
+              const overnightCoords = geocodedLocations.get(day.overnightLocation);
+              return {
+                ...attraction,
+                coordinates: overnightCoords ? {
+                  lat: overnightCoords.lat + (Math.random() - 0.5) * 0.01,
+                  lng: overnightCoords.lng + (Math.random() - 0.5) * 0.01
+                } : null
+              };
+            }
+          })
+        );
+
+        return {
+          ...day,
+          route: {
+            ...day.route,
+            fromCoordinates: geocodedLocations.get(day.route.from),
+            toCoordinates: geocodedLocations.get(day.route.to),
+          },
+          overnightCoordinates: geocodedLocations.get(day.overnightLocation),
+          attractions: geocodedAttractions
+        };
       }))
     };
     

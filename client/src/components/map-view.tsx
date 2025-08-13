@@ -221,43 +221,55 @@ export function MapView({ itinerary, isLoading }: MapViewProps) {
       // Add markers for attractions
       if (day.attractions && day.attractions.length > 0) {
         day.attractions.forEach((attraction, attractionIndex) => {
-          // For now, place attractions near the overnight location with small random offset
-          // In a real app, you'd geocode each attraction individually
-          if (day.overnightCoordinates) {
-            const attractionMarker = new window.google.maps.Marker({
-              position: { 
-                lat: day.overnightCoordinates.lat + (Math.random() - 0.5) * 0.02,
-                lng: day.overnightCoordinates.lng + (Math.random() - 0.5) * 0.02
-              },
-              map: googleMapRef.current,
-              title: `${attraction.name}`,
-              icon: {
-                url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="8" fill="#f59e0b" stroke="#fff" stroke-width="2"/>
-                    <circle cx="12" cy="12" r="2" fill="#fff"/>
-                  </svg>
-                `),
-                scaledSize: new window.google.maps.Size(20, 20),
-                anchor: new window.google.maps.Point(10, 10)
-              }
-            });
-
-            // Add click handler for attraction
-            attractionMarker.addListener('click', () => {
-              setSelectedLocation({
-                type: 'attraction',
-                name: attraction.name,
-                description: attraction.description,
-                dayNumber: day.dayNumber,
-                date: day.date
-              });
-            });
-
-            markers.push(attractionMarker);
-            markersRef.current.push(attractionMarker);
-            bounds.extend(attractionMarker.getPosition()!);
+          // Use actual coordinates if available, otherwise fallback to near overnight location
+          let attractionPosition;
+          
+          if (attraction.coordinates) {
+            attractionPosition = {
+              lat: attraction.coordinates.lat,
+              lng: attraction.coordinates.lng
+            };
+          } else if (day.overnightCoordinates) {
+            // Fallback: place near overnight location with small offset
+            attractionPosition = {
+              lat: day.overnightCoordinates.lat + (Math.random() - 0.5) * 0.01,
+              lng: day.overnightCoordinates.lng + (Math.random() - 0.5) * 0.01
+            };
+          } else {
+            // Skip if no coordinates available
+            return;
           }
+
+          const attractionMarker = new window.google.maps.Marker({
+            position: attractionPosition,
+            map: googleMapRef.current,
+            title: `${attraction.name}`,
+            icon: {
+              url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="8" fill="#f59e0b" stroke="#fff" stroke-width="2"/>
+                  <circle cx="12" cy="12" r="2" fill="#fff"/>
+                </svg>
+              `),
+              scaledSize: new window.google.maps.Size(20, 20),
+              anchor: new window.google.maps.Point(10, 10)
+            }
+          });
+
+          // Add click handler for attraction
+          attractionMarker.addListener('click', () => {
+            setSelectedLocation({
+              type: 'attraction',
+              name: attraction.name,
+              description: attraction.description,
+              dayNumber: day.dayNumber,
+              date: day.date
+            });
+          });
+
+          markers.push(attractionMarker);
+          markersRef.current.push(attractionMarker);
+          bounds.extend(attractionMarker.getPosition()!);
         });
       }
     });
