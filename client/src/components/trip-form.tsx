@@ -384,7 +384,6 @@ export function TripForm({ onSubmit, isLoading, completedTrip }: TripFormProps) 
               <div className="grid grid-cols-2 gap-3">
                 {[
                   "Nature",
-                  "Beaches and coast",
                   "Historic sites",
                   "Adventure and outdoor activities",
                   "Art and galleries",
@@ -417,6 +416,7 @@ export function TripForm({ onSubmit, isLoading, completedTrip }: TripFormProps) 
                   <div className="grid grid-cols-2 gap-2 text-xs">
                     {[
                       "National and State Parks",
+                      "Beaches and coast",
                       "Waterfalls",
                       "Desert",
                       "Forest",
