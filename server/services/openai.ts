@@ -35,10 +35,18 @@ Trip Details:
 
 ${request.interests && request.interests.length > 0 ? `- Travel Interests: ${request.interests.join(', ')}
 
-IMPORTANT: The itinerary MUST include attractions from ALL selected interest categories. For each interest category selected:
-${request.interests.map(interest => `- ${interest}: Include specific attractions of this type`).join('\n')}
+CRITICAL REQUIREMENT: The itinerary MUST include attractions from EVERY selected interest category. No exceptions.
 
-Distribute these interest-based attractions across different days of the trip to ensure variety.` : ''}
+For each interest category selected:
+${request.interests.map(interest => `- ${interest}: MUST include at least one specific attraction of this type`).join('\n')}
+
+Examples of what to include:
+- For "Beaches and coast": Include beaches, coastal viewpoints, seaside towns, coastal state parks, lighthouses, or oceanfront attractions
+- For "Waterfalls": Include named waterfalls, waterfall hikes, or cascade viewpoints
+- For "Mountains": Include mountain peaks, scenic overlooks, mountain parks, or alpine areas
+- For "National and State Parks": Include specific national or state parks along the route
+
+Distribute these interest-based attractions across different days. Each selected interest category MUST appear in the final itinerary.` : ''}
 
 Rules:
 - Assume travel is by car
