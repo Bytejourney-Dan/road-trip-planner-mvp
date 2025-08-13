@@ -45,9 +45,21 @@ export function MapView({ itinerary, isLoading }: MapViewProps) {
       if (!mapRef.current) return;
 
       googleMapRef.current = new window.google.maps.Map(mapRef.current, {
-        zoom: 6,
-        center: { lat: 37.7749, lng: -122.4194 }, // Default to San Francisco
+        zoom: 5,
+        center: { lat: 39.8283, lng: -98.5795 }, // Center of USA for better initial view
         mapTypeId: window.google.maps.MapTypeId.ROADMAP,
+        styles: [
+          {
+            featureType: "water",
+            elementType: "geometry",
+            stylers: [{ color: "#e9e9e9" }, { lightness: 17 }]
+          },
+          {
+            featureType: "landscape",
+            elementType: "geometry",
+            stylers: [{ color: "#f5f5f5" }, { lightness: 20 }]
+          }
+        ]
       });
     };
 
@@ -320,11 +332,11 @@ export function MapView({ itinerary, isLoading }: MapViewProps) {
 
       {/* Empty State Overlay - only when no trip is planned */}
       {showEmptyState && (
-        <div className="absolute inset-0 bg-black bg-opacity-20 flex items-center justify-center">
-          <div className="glass-strong rounded-2xl p-8 text-center max-w-md mx-4 animate-fade-in">
-            <MapPin className="h-16 w-16 mb-4 text-blue-400 mx-auto animate-float" />
-            <h3 className="text-lg font-semibold mb-2 text-gray-900" data-testid="text-empty-state">Ready to Plan Your Adventure?</h3>
-            <p className="text-sm text-gray-700" data-testid="text-empty-instructions">Fill out the trip details in the left panel to see your route on this map</p>
+        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-10">
+          <div className="glass-strong rounded-2xl p-6 text-center max-w-sm animate-fade-in">
+            <MapPin className="h-12 w-12 mb-3 text-blue-400 mx-auto animate-float" />
+            <h3 className="text-base font-semibold mb-2 text-gray-900" data-testid="text-empty-state">Ready to Plan Your Adventure?</h3>
+            <p className="text-sm text-gray-700" data-testid="text-empty-instructions">Fill out the trip details to see your route here</p>
           </div>
         </div>
       )}
