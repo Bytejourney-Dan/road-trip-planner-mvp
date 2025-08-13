@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { MapPin, Camera, Bed, ZoomIn, ZoomOut, Maximize, X, Navigation, Clock, CheckCircle } from "lucide-react";
+import { MapPin, Camera, Bed, ZoomIn, ZoomOut, Maximize, X, Navigation, Clock, CheckCircle, Plus, Trash2, RefreshCw } from "lucide-react";
 import { TripItinerary } from "@/types/trip";
 import { LoadingState } from "./loading-state";
 
@@ -12,6 +12,7 @@ declare global {
 interface MapViewProps {
   itinerary?: TripItinerary;
   isLoading: boolean;
+  onItineraryUpdate?: (updatedItinerary: TripItinerary) => void;
 }
 
 interface LocationInfo {
@@ -41,12 +42,15 @@ interface LocationInfo {
   };
 }
 
-export function MapView({ itinerary, isLoading }: MapViewProps) {
+export function MapView({ itinerary, isLoading, onItineraryUpdate }: MapViewProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const googleMapRef = useRef<any | null>(null);
   const markersRef = useRef<any[]>([]);
   const polylinesRef = useRef<any[]>([]);
   const [selectedLocation, setSelectedLocation] = useState<LocationInfo | null>(null);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [customAttractions, setCustomAttractions] = useState<Map<number, any[]>>(new Map());
+  const [pendingChanges, setPendingChanges] = useState(false);
 
   useEffect(() => {
     if (!mapRef.current) return;
@@ -71,6 +75,13 @@ export function MapView({ itinerary, isLoading }: MapViewProps) {
             stylers: [{ color: "#f5f5f5" }, { lightness: 20 }]
           }
         ]
+      });
+
+      // Add click listener for adding new attractions in edit mode
+      googleMapRef.current.addListener('click', (e: any) => {
+        if (isEditMode) {
+          handleMapClick(e.latLng);
+        }
       });
     };
 
@@ -116,6 +127,108 @@ export function MapView({ itinerary, isLoading }: MapViewProps) {
     return () => clearTimeout(timer);
   }, [itinerary]);
 
+  // Handle map click to add new attraction
+  const handleMapClick = async (latLng: any) => {
+    if (!isEditMode || !itinerary) return;
+
+    try {
+      // Get place details from coordinates using reverse geocoding
+      const response = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${latLng.lat()},${latLng.lng()}&key=${await fetch('/api/config/maps-key').then(r => r.json()).then(d => d.apiKey)}`);
+      const data = await response.json();
+      
+      let placeName = "Custom Location";
+      if (data.results && data.results.length > 0) {
+        placeName = data.results[0].formatted_address || data.results[0].name || "Custom Location";
+      }
+
+      // Find closest day to add the attraction to
+      let closestDay = 1;
+      let minDistance = Infinity;
+      
+      itinerary.days.forEach((day) => {
+        if (day.overnightCoordinates) {
+          const distance = Math.sqrt(
+            Math.pow(latLng.lat() - day.overnightCoordinates.lat, 2) +
+            Math.pow(latLng.lng() - day.overnightCoordinates.lng, 2)
+          );
+          if (distance < minDistance) {
+            minDistance = distance;
+            closestDay = day.dayNumber;
+          }
+        }
+      });
+
+      const newAttraction = {
+        name: placeName,
+        description: "Custom added location",
+        coordinates: {
+          lat: latLng.lat(),
+          lng: latLng.lng()
+        },
+        isCustom: true
+      };
+
+      // Add to custom attractions for the closest day
+      const dayAttractions = customAttractions.get(closestDay) || [];
+      dayAttractions.push(newAttraction);
+      setCustomAttractions(new Map(customAttractions.set(closestDay, dayAttractions)));
+      setPendingChanges(true);
+
+      // Update map immediately
+      updateMapWithItinerary();
+    } catch (error) {
+      console.error("Error adding custom attraction:", error);
+    }
+  };
+
+  // Remove attraction
+  const removeAttraction = (dayNumber: number, attractionIndex: number, isCustom: boolean) => {
+    if (isCustom) {
+      const dayAttractions = customAttractions.get(dayNumber) || [];
+      dayAttractions.splice(attractionIndex, 1);
+      setCustomAttractions(new Map(customAttractions.set(dayNumber, dayAttractions)));
+    } else {
+      // For original attractions, we'll mark them as removed
+      const dayAttractions = customAttractions.get(dayNumber) || [];
+      const removedAttraction = { ...itinerary!.days[dayNumber - 1].attractions[attractionIndex], isRemoved: true };
+      dayAttractions.push(removedAttraction);
+      setCustomAttractions(new Map(customAttractions.set(dayNumber, dayAttractions)));
+    }
+    setPendingChanges(true);
+    updateMapWithItinerary();
+  };
+
+  // Update itinerary with custom changes
+  const updateItinerary = async () => {
+    if (!itinerary || !onItineraryUpdate) return;
+
+    const updatedItinerary = { ...itinerary };
+    
+    // Apply custom changes to each day
+    updatedItinerary.days = itinerary.days.map((day) => {
+      const customDayAttractions = customAttractions.get(day.dayNumber) || [];
+      
+      // Filter out removed attractions and add custom ones
+      const originalAttractions = day.attractions.filter((_, index) => {
+        return !customDayAttractions.some(custom => custom.isRemoved && custom.name === day.attractions[index].name);
+      });
+      
+      const newCustomAttractions = customDayAttractions.filter(custom => !custom.isRemoved);
+      
+      return {
+        ...day,
+        attractions: [...originalAttractions, ...newCustomAttractions]
+      };
+    });
+
+    // Recalculate totals
+    updatedItinerary.totalAttractions = updatedItinerary.days.reduce((total, day) => total + day.attractions.length, 0);
+
+    onItineraryUpdate(updatedItinerary);
+    setPendingChanges(false);
+    setIsEditMode(false);
+  };
+
   const updateMapWithItinerary = () => {
     if (!googleMapRef.current || !itinerary) return;
 
@@ -134,9 +247,27 @@ export function MapView({ itinerary, isLoading }: MapViewProps) {
     }
 
     itinerary.days.forEach((day, index) => {
+      // Get all attractions for this day (original + custom)
+      const allDayAttractions = [...day.attractions];
+      const customDayAttractions = customAttractions.get(day.dayNumber) || [];
+      
+      // Add custom attractions and filter out removed ones
+      customDayAttractions.forEach((custom) => {
+        if (!custom.isRemoved) {
+          allDayAttractions.push(custom);
+        }
+      });
+
+      // Filter out any attractions marked as removed
+      const activeAttractions = allDayAttractions.filter((attraction) => {
+        return !customDayAttractions.some(custom => 
+          custom.isRemoved && custom.name === attraction.name
+        );
+      });
+
       // Add attractions as waypoints before the overnight location
-      if (day.attractions && day.attractions.length > 0) {
-        day.attractions.forEach((attraction) => {
+      if (activeAttractions.length > 0) {
+        activeAttractions.forEach((attraction) => {
           if (attraction.coordinates) {
             routeCoordinates.push(new window.google.maps.LatLng(
               attraction.coordinates.lat,
@@ -252,9 +383,9 @@ export function MapView({ itinerary, isLoading }: MapViewProps) {
         bounds.extend(endMarker.getPosition()!);
       }
 
-      // Add markers for attractions
-      if (day.attractions && day.attractions.length > 0) {
-        day.attractions.forEach((attraction, attractionIndex) => {
+      // Add markers for attractions (including custom ones)
+      if (activeAttractions && activeAttractions.length > 0) {
+        activeAttractions.forEach((attraction, attractionIndex) => {
           // Use actual coordinates if available, otherwise fallback to near overnight location
           let attractionPosition;
           
@@ -661,11 +792,87 @@ export function MapView({ itinerary, isLoading }: MapViewProps) {
               </div>
             )}
 
+            {/* Delete Attraction Button (Edit Mode) */}
+            {isEditMode && selectedLocation.type === 'attraction' && selectedLocation.dayNumber && (
+              <div className="mb-4">
+                <button
+                  onClick={() => {
+                    // Find if this is a custom attraction
+                    const customDayAttractions = customAttractions.get(selectedLocation.dayNumber!) || [];
+                    const isCustomAttraction = customDayAttractions.some(custom => 
+                      custom.name === selectedLocation.name && !custom.isRemoved
+                    );
+                    
+                    // Find the attraction index in the original day attractions
+                    const originalAttractions = itinerary?.days.find(d => d.dayNumber === selectedLocation.dayNumber)?.attractions || [];
+                    const originalIndex = originalAttractions.findIndex(attr => attr.name === selectedLocation.name);
+                    
+                    if (isCustomAttraction) {
+                      const customIndex = customDayAttractions.findIndex(custom => 
+                        custom.name === selectedLocation.name && !custom.isRemoved
+                      );
+                      removeAttraction(selectedLocation.dayNumber!, customIndex, true);
+                    } else if (originalIndex >= 0) {
+                      removeAttraction(selectedLocation.dayNumber!, originalIndex, false);
+                    }
+                    
+                    setSelectedLocation(null);
+                  }}
+                  className="w-full px-4 py-2 bg-red-500 text-white rounded-lg font-medium hover:bg-red-600 transition-all duration-200 flex items-center justify-center space-x-2"
+                  data-testid="button-delete-attraction"
+                >
+                  <Trash2 className="h-4 w-4" />
+                  <span>Remove Attraction</span>
+                </button>
+              </div>
+            )}
+
             {/* Overnight Location Badge */}
             {selectedLocation.type === 'overnight' && (
               <div className="mt-4 p-3 glass-light rounded-xl flex items-center">
                 <Bed className="h-4 w-4 text-blue-500 mr-2" />
                 <span className="text-sm font-medium text-gray-800" data-testid="text-overnight-indicator">Overnight stay location</span>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Edit Mode Controls */}
+      {itinerary && (
+        <div className="absolute bottom-4 left-4 z-50">
+          <div className="glass-strong rounded-2xl p-4 space-y-3">
+            <div className="flex items-center space-x-3">
+              <button
+                onClick={() => setIsEditMode(!isEditMode)}
+                className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 flex items-center space-x-2 ${
+                  isEditMode 
+                    ? 'bg-orange-500 text-white hover:bg-orange-600' 
+                    : 'bg-blue-500 text-white hover:bg-blue-600'
+                }`}
+                data-testid="button-toggle-edit"
+              >
+                <Plus className="h-4 w-4" />
+                <span>{isEditMode ? 'Exit Edit' : 'Edit Locations'}</span>
+              </button>
+              
+              {pendingChanges && (
+                <button
+                  onClick={updateItinerary}
+                  className="px-4 py-2 bg-green-500 text-white rounded-lg font-medium hover:bg-green-600 transition-all duration-200 flex items-center space-x-2"
+                  data-testid="button-update-itinerary"
+                >
+                  <RefreshCw className="h-4 w-4" />
+                  <span>Update Itinerary</span>
+                </button>
+              )}
+            </div>
+            
+            {isEditMode && (
+              <div className="text-sm text-gray-700 bg-white/50 rounded-lg p-3">
+                <p className="font-medium mb-1">Edit Mode Active</p>
+                <p>• Click on map to add new attractions</p>
+                <p>• Click attractions to view details and delete option</p>
               </div>
             )}
           </div>

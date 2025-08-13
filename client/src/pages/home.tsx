@@ -79,6 +79,20 @@ export default function Home() {
     planTripMutation.mutate(formData);
   };
 
+  const handleItineraryUpdate = (updatedItinerary: any) => {
+    if (completedTrip) {
+      setCompletedTrip({
+        ...completedTrip,
+        itinerary: updatedItinerary
+      });
+      
+      toast({
+        title: "Itinerary Updated!",
+        description: "Your trip has been updated with your custom locations.",
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-blue-50 via-white to-purple-50">
       {/* Header */}
@@ -148,6 +162,7 @@ export default function Home() {
               key={completedTrip ? `map-${completedTrip.id}-${Date.now()}` : 'default'}
               itinerary={completedTrip?.itinerary}
               isLoading={planTripMutation.isPending}
+              onItineraryUpdate={handleItineraryUpdate}
             />
           ) : (
             <div className="h-full p-6 overflow-y-auto glass-scrollbar">
