@@ -38,7 +38,6 @@ export function MapView({ itinerary, isLoading }: MapViewProps) {
       fetch('/api/config/maps-key')
         .then(response => response.json())
         .then(config => {
-          console.log('Frontend API Key:', config.apiKey ? 'Present' : 'Missing');
           
           const script = document.createElement('script');
           script.src = `https://maps.googleapis.com/maps/api/js?key=${config.apiKey}&libraries=places`;
@@ -143,6 +142,12 @@ export function MapView({ itinerary, isLoading }: MapViewProps) {
     // Fit map to show all markers
     if (!bounds.isEmpty()) {
       googleMapRef.current.fitBounds(bounds);
+      // Add some padding to the bounds
+      setTimeout(() => {
+        if (googleMapRef.current.getZoom() > 15) {
+          googleMapRef.current.setZoom(15);
+        }
+      }, 100);
     }
 
   }, [itinerary]);
