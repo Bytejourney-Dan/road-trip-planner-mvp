@@ -106,6 +106,28 @@
   body {
     @apply font-sans antialiased bg-gradient-to-br from-blue-50 via-white to-purple-50 text-foreground;
     background-attachment: fixed;
+    /* Mobile optimization */
+    touch-action: manipulation;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  /* Mobile-specific optimizations */
+  @media (max-width: 768px) {
+    .min-h-screen {
+      min-height: 100vh;
+      min-height: -webkit-fill-available;
+    }
+    
+    button, .btn {
+      min-height: 44px;
+    }
+    
+    .overflow-y-auto {
+      -webkit-overflow-scrolling: touch;
+    }
   }
 }
 
