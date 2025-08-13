@@ -25,10 +25,14 @@ export default function Home() {
       setCompletedTrip(trip);
       // Force map view to be active to show the new route immediately
       setActiveView("map");
-      toast({
-        title: "Trip Generated Successfully!",
-        description: `Your ${trip.itinerary?.totalDays}-day road trip is ready to explore.`,
-      });
+      
+      // Add a small delay to ensure map component re-renders with new data
+      setTimeout(() => {
+        toast({
+          title: "Trip Generated Successfully!",
+          description: `Your ${trip.itinerary?.totalDays}-day road trip is ready to explore.`,
+        });
+      }, 100);
     },
     onError: (error: any) => {
       console.error("Failed to plan trip:", error);
@@ -141,6 +145,7 @@ export default function Home() {
           {/* Content Views */}
           {activeView === "map" && (
             <MapView 
+              key={completedTrip ? `map-${completedTrip.id}-${Date.now()}` : 'default'}
               itinerary={completedTrip?.itinerary}
               isLoading={planTripMutation.isPending}
             />

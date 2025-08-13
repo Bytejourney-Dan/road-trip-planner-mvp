@@ -59,11 +59,22 @@ export function MapView({ itinerary, isLoading }: MapViewProps) {
   useEffect(() => {
     if (!googleMapRef.current || !itinerary) return;
 
-    // Clear existing markers and polylines
-    markersRef.current.forEach(marker => marker.setMap(null));
-    polylinesRef.current.forEach(polyline => polyline.setMap(null));
-    markersRef.current = [];
-    polylinesRef.current = [];
+    // Add a small delay to ensure the map is ready
+    const timer = setTimeout(() => {
+      // Clear existing markers and polylines
+      markersRef.current.forEach(marker => marker.setMap(null));
+      polylinesRef.current.forEach(polyline => polyline.setMap(null));
+      markersRef.current = [];
+      polylinesRef.current = [];
+
+      updateMapWithItinerary();
+    }, 50);
+
+    return () => clearTimeout(timer);
+  }, [itinerary]);
+
+  const updateMapWithItinerary = () => {
+    if (!googleMapRef.current || !itinerary) return;
 
     const bounds = new window.google.maps.LatLngBounds();
     const markers: any[] = [];
@@ -214,8 +225,7 @@ export function MapView({ itinerary, isLoading }: MapViewProps) {
         }
       });
     }
-
-  }, [itinerary]);
+  };
 
   if (!itinerary && !isLoading) {
     return (
