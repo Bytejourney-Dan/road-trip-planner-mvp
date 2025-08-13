@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { MapPin, Flag, Clock, Sparkles, CheckCircle } from "lucide-react";
+import { MapPin, Flag, Clock, Sparkles, CheckCircle, ChevronDown } from "lucide-react";
 import { TripFormData, Trip } from "@/types/trip";
 
 interface TripFormProps {
@@ -27,10 +27,23 @@ export function TripForm({ onSubmit, isLoading, completedTrip }: TripFormProps) 
   });
 
   const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
-  const [customStartLocation, setCustomStartLocation] = useState("");
-  const [customEndLocation, setCustomEndLocation] = useState("");
-  const [showCustomStart, setShowCustomStart] = useState(false);
-  const [showCustomEnd, setShowCustomEnd] = useState(false);
+  const [startLocationInput, setStartLocationInput] = useState("");
+  const [endLocationInput, setEndLocationInput] = useState("");
+  const [showStartSuggestions, setShowStartSuggestions] = useState(false);
+  const [showEndSuggestions, setShowEndSuggestions] = useState(false);
+  const [filteredStartCities, setFilteredStartCities] = useState<string[]>([]);
+  const [filteredEndCities, setFilteredEndCities] = useState<string[]>([]);
+  
+  const startInputRef = useRef<HTMLInputElement>(null);
+  const endInputRef = useRef<HTMLInputElement>(null);
+  
+  const cities = [
+    "New York, NY", "Los Angeles, CA", "Chicago, IL", "Houston, TX", "Phoenix, AZ",
+    "Philadelphia, PA", "San Antonio, TX", "San Diego, CA", "Dallas, TX", "San Jose, CA",
+    "Austin, TX", "Jacksonville, FL", "Fort Worth, TX", "Columbus, OH", "San Francisco, CA",
+    "Charlotte, NC", "Indianapolis, IN", "Seattle, WA", "Denver, CO", "Boston, MA",
+    "Nashville, TN", "Miami, FL", "Las Vegas, NV", "Portland, OR", "Atlanta, GA"
+  ];
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,35 +64,62 @@ export function TripForm({ onSubmit, isLoading, completedTrip }: TripFormProps) 
     });
   };
 
-  const handleStartLocationChange = (value: string) => {
-    if (value === "custom") {
-      setShowCustomStart(true);
-      handleInputChange("startLocation", customStartLocation);
-    } else {
-      setShowCustomStart(false);
-      handleInputChange("startLocation", value);
-    }
-  };
-
-  const handleEndLocationChange = (value: string) => {
-    if (value === "custom") {
-      setShowCustomEnd(true);
-      handleInputChange("endLocation", customEndLocation);
-    } else {
-      setShowCustomEnd(false);
-      handleInputChange("endLocation", value);
-    }
-  };
-
-  const handleCustomStartLocationChange = (value: string) => {
-    setCustomStartLocation(value);
+  const handleStartLocationInputChange = (value: string) => {
+    setStartLocationInput(value);
     handleInputChange("startLocation", value);
+    
+    if (value.length > 0) {
+      const filtered = cities.filter(city => 
+        city.toLowerCase().includes(value.toLowerCase())
+      );
+      setFilteredStartCities(filtered);
+      setShowStartSuggestions(true);
+    } else {
+      setShowStartSuggestions(false);
+    }
   };
 
-  const handleCustomEndLocationChange = (value: string) => {
-    setCustomEndLocation(value);
+  const handleEndLocationInputChange = (value: string) => {
+    setEndLocationInput(value);
     handleInputChange("endLocation", value);
+    
+    if (value.length > 0) {
+      const filtered = cities.filter(city => 
+        city.toLowerCase().includes(value.toLowerCase())
+      );
+      setFilteredEndCities(filtered);
+      setShowEndSuggestions(true);
+    } else {
+      setShowEndSuggestions(false);
+    }
   };
+
+  const selectStartLocation = (city: string) => {
+    setStartLocationInput(city);
+    handleInputChange("startLocation", city);
+    setShowStartSuggestions(false);
+  };
+
+  const selectEndLocation = (city: string) => {
+    setEndLocationInput(city);
+    handleInputChange("endLocation", city);
+    setShowEndSuggestions(false);
+  };
+
+  // Close suggestions when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (startInputRef.current && !startInputRef.current.contains(event.target as Node)) {
+        setShowStartSuggestions(false);
+      }
+      if (endInputRef.current && !endInputRef.current.contains(event.target as Node)) {
+        setShowEndSuggestions(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   return (
     <div className="w-full lg:w-80 bg-white border-r border-gray-200 overflow-y-auto">
@@ -97,66 +137,41 @@ export function TripForm({ onSubmit, isLoading, completedTrip }: TripFormProps) 
                 <MapPin className="h-4 w-4 text-emerald-600 mr-2" />
                 Start Location
               </Label>
-              {!showCustomStart ? (
-                <Select 
-                  value={formData.startLocation} 
-                  onValueChange={handleStartLocationChange}
+              <div className="relative" ref={startInputRef}>
+                <Input
+                  id="startLocation"
+                  type="text"
+                  placeholder="Type city name (e.g., San Francisco, CA)"
+                  value={startLocationInput}
+                  onChange={(e) => handleStartLocationInputChange(e.target.value)}
+                  onFocus={() => {
+                    if (startLocationInput.length > 0) {
+                      setShowStartSuggestions(true);
+                    }
+                  }}
+                  required
                   disabled={isLoading}
-                >
-                  <SelectTrigger data-testid="select-start-location">
-                    <SelectValue placeholder="Select start location" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="custom">✏️ Type custom location</SelectItem>
-                    <SelectItem value="New York, NY">New York, NY</SelectItem>
-                    <SelectItem value="Los Angeles, CA">Los Angeles, CA</SelectItem>
-                    <SelectItem value="Chicago, IL">Chicago, IL</SelectItem>
-                    <SelectItem value="Houston, TX">Houston, TX</SelectItem>
-                    <SelectItem value="Phoenix, AZ">Phoenix, AZ</SelectItem>
-                    <SelectItem value="Philadelphia, PA">Philadelphia, PA</SelectItem>
-                    <SelectItem value="San Antonio, TX">San Antonio, TX</SelectItem>
-                    <SelectItem value="San Diego, CA">San Diego, CA</SelectItem>
-                    <SelectItem value="Dallas, TX">Dallas, TX</SelectItem>
-                    <SelectItem value="San Jose, CA">San Jose, CA</SelectItem>
-                    <SelectItem value="Austin, TX">Austin, TX</SelectItem>
-                    <SelectItem value="Jacksonville, FL">Jacksonville, FL</SelectItem>
-                    <SelectItem value="Fort Worth, TX">Fort Worth, TX</SelectItem>
-                    <SelectItem value="Columbus, OH">Columbus, OH</SelectItem>
-                    <SelectItem value="San Francisco, CA">San Francisco, CA</SelectItem>
-                    <SelectItem value="Charlotte, NC">Charlotte, NC</SelectItem>
-                    <SelectItem value="Indianapolis, IN">Indianapolis, IN</SelectItem>
-                    <SelectItem value="Seattle, WA">Seattle, WA</SelectItem>
-                    <SelectItem value="Denver, CO">Denver, CO</SelectItem>
-                    <SelectItem value="Boston, MA">Boston, MA</SelectItem>
-                    <SelectItem value="Nashville, TN">Nashville, TN</SelectItem>
-                    <SelectItem value="Miami, FL">Miami, FL</SelectItem>
-                    <SelectItem value="Las Vegas, NV">Las Vegas, NV</SelectItem>
-                    <SelectItem value="Portland, OR">Portland, OR</SelectItem>
-                    <SelectItem value="Atlanta, GA">Atlanta, GA</SelectItem>
-                  </SelectContent>
-                </Select>
-              ) : (
-                <div className="space-y-2">
-                  <Input
-                    type="text"
-                    placeholder="e.g., Small Town, State or Address"
-                    value={customStartLocation}
-                    onChange={(e) => handleCustomStartLocationChange(e.target.value)}
-                    disabled={isLoading}
-                    data-testid="input-custom-start-location"
-                  />
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setShowCustomStart(false)}
-                    disabled={isLoading}
-                    className="text-xs"
-                  >
-                    ← Back to preset cities
-                  </Button>
-                </div>
-              )}
+                  data-testid="input-start-location"
+                  className="pr-8"
+                />
+                <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                
+                {showStartSuggestions && filteredStartCities.length > 0 && (
+                  <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-y-auto">
+                    {filteredStartCities.map((city, index) => (
+                      <button
+                        key={index}
+                        type="button"
+                        className="w-full px-3 py-2 text-left hover:bg-gray-50 focus:bg-gray-50 focus:outline-none border-b border-gray-100 last:border-b-0"
+                        onClick={() => selectStartLocation(city)}
+                        data-testid={`suggestion-start-${index}`}
+                      >
+                        {city}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
             
             <div>
@@ -164,66 +179,41 @@ export function TripForm({ onSubmit, isLoading, completedTrip }: TripFormProps) 
                 <Flag className="h-4 w-4 text-red-600 mr-2" />
                 End Location
               </Label>
-              {!showCustomEnd ? (
-                <Select 
-                  value={formData.endLocation} 
-                  onValueChange={handleEndLocationChange}
+              <div className="relative" ref={endInputRef}>
+                <Input
+                  id="endLocation"
+                  type="text"
+                  placeholder="Type city name (e.g., Los Angeles, CA)"
+                  value={endLocationInput}
+                  onChange={(e) => handleEndLocationInputChange(e.target.value)}
+                  onFocus={() => {
+                    if (endLocationInput.length > 0) {
+                      setShowEndSuggestions(true);
+                    }
+                  }}
+                  required
                   disabled={isLoading}
-                >
-                  <SelectTrigger data-testid="select-end-location">
-                    <SelectValue placeholder="Select end location" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="custom">✏️ Type custom location</SelectItem>
-                    <SelectItem value="New York, NY">New York, NY</SelectItem>
-                    <SelectItem value="Los Angeles, CA">Los Angeles, CA</SelectItem>
-                    <SelectItem value="Chicago, IL">Chicago, IL</SelectItem>
-                    <SelectItem value="Houston, TX">Houston, TX</SelectItem>
-                    <SelectItem value="Phoenix, AZ">Phoenix, AZ</SelectItem>
-                    <SelectItem value="Philadelphia, PA">Philadelphia, PA</SelectItem>
-                    <SelectItem value="San Antonio, TX">San Antonio, TX</SelectItem>
-                    <SelectItem value="San Diego, CA">San Diego, CA</SelectItem>
-                    <SelectItem value="Dallas, TX">Dallas, TX</SelectItem>
-                    <SelectItem value="San Jose, CA">San Jose, CA</SelectItem>
-                    <SelectItem value="Austin, TX">Austin, TX</SelectItem>
-                    <SelectItem value="Jacksonville, FL">Jacksonville, FL</SelectItem>
-                    <SelectItem value="Fort Worth, TX">Fort Worth, TX</SelectItem>
-                    <SelectItem value="Columbus, OH">Columbus, OH</SelectItem>
-                    <SelectItem value="San Francisco, CA">San Francisco, CA</SelectItem>
-                    <SelectItem value="Charlotte, NC">Charlotte, NC</SelectItem>
-                    <SelectItem value="Indianapolis, IN">Indianapolis, IN</SelectItem>
-                    <SelectItem value="Seattle, WA">Seattle, WA</SelectItem>
-                    <SelectItem value="Denver, CO">Denver, CO</SelectItem>
-                    <SelectItem value="Boston, MA">Boston, MA</SelectItem>
-                    <SelectItem value="Nashville, TN">Nashville, TN</SelectItem>
-                    <SelectItem value="Miami, FL">Miami, FL</SelectItem>
-                    <SelectItem value="Las Vegas, NV">Las Vegas, NV</SelectItem>
-                    <SelectItem value="Portland, OR">Portland, OR</SelectItem>
-                    <SelectItem value="Atlanta, GA">Atlanta, GA</SelectItem>
-                  </SelectContent>
-                </Select>
-              ) : (
-                <div className="space-y-2">
-                  <Input
-                    type="text"
-                    placeholder="e.g., Small Town, State or Address"
-                    value={customEndLocation}
-                    onChange={(e) => handleCustomEndLocationChange(e.target.value)}
-                    disabled={isLoading}
-                    data-testid="input-custom-end-location"
-                  />
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setShowCustomEnd(false)}
-                    disabled={isLoading}
-                    className="text-xs"
-                  >
-                    ← Back to preset cities
-                  </Button>
-                </div>
-              )}
+                  data-testid="input-end-location"
+                  className="pr-8"
+                />
+                <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                
+                {showEndSuggestions && filteredEndCities.length > 0 && (
+                  <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-y-auto">
+                    {filteredEndCities.map((city, index) => (
+                      <button
+                        key={index}
+                        type="button"
+                        className="w-full px-3 py-2 text-left hover:bg-gray-50 focus:bg-gray-50 focus:outline-none border-b border-gray-100 last:border-b-0"
+                        onClick={() => selectEndLocation(city)}
+                        data-testid={`suggestion-end-${index}`}
+                      >
+                        {city}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
