@@ -131,20 +131,6 @@ export default function Home() {
                 variant="ghost"
                 size="sm"
                 className={`rounded-lg transition-all duration-300 ${
-                  activeView === "form"
-                    ? "bg-white text-gray-900 shadow-md"
-                    : "text-gray-600 hover:text-gray-900 hover:bg-white/50"
-                }`}
-                onClick={() => setActiveView("form")}
-                data-testid="tab-form"
-              >
-                <RouteIcon className="h-4 w-4 mr-2" />
-                Plan
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                className={`rounded-lg transition-all duration-300 ${
                   activeView === "map"
                     ? "bg-white text-gray-900 shadow-md"
                     : "text-gray-600 hover:text-gray-900 hover:bg-white/50"
@@ -236,12 +222,7 @@ export default function Home() {
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col lg:flex-row">
         {/* Desktop Layout: Left Panel - Trip Planning Form */}
-        <div className={`
-          ${activeView === "form" ? "block" : "hidden"} lg:block
-          w-full lg:w-96 glass-strong border-b lg:border-r lg:border-b-0 border-white/20 
-          p-6 overflow-y-auto glass-scrollbar
-          ${activeView === "form" ? "flex-1" : ""}
-        `}>
+        <div className="w-full lg:w-96 glass-strong border-b lg:border-r lg:border-b-0 border-white/20 p-6 overflow-y-auto glass-scrollbar">
           <TripForm 
             onSubmit={handlePlanTrip}
             isLoading={planTripMutation.isPending}
@@ -250,10 +231,7 @@ export default function Home() {
         </div>
 
         {/* Desktop Layout: Right Panel - Map or Itinerary */}
-        <div className={`
-          flex-1 relative
-          ${activeView === "form" ? "hidden md:block" : "block"}
-        `}>
+        <div className="flex-1 relative">
           {activeView === "map" ? (
             <MapView 
               key={completedTrip ? `map-${completedTrip.id}-${Date.now()}` : 'default'}
