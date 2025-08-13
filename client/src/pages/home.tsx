@@ -80,82 +80,84 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
+    <div className="min-h-screen relative overflow-hidden">
+      {/* Floating Header */}
+      <header className="absolute top-6 left-6 right-6 z-50 glass rounded-2xl animate-fade-in">
+        <div className="px-6 py-4">
+          <div className="flex justify-between items-center">
             <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                <RouteIcon className="h-4 w-4 text-white" />
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center animate-glow">
+                <RouteIcon className="h-5 w-5 text-white" />
               </div>
-              <h1 className="text-xl font-semibold text-gray-900" data-testid="text-app-title">RoadTrip Planner</h1>
+              <div>
+                <h1 className="text-xl font-bold text-gray-900" data-testid="text-app-title">RoadTrip Planner</h1>
+                <p className="text-xs text-gray-600" data-testid="text-app-subtitle">AI-Powered Travel Planning</p>
+              </div>
             </div>
-            <div className="flex items-center space-x-4">
-              <span className="text-sm text-gray-600" data-testid="text-app-subtitle">AI-Powered Travel Planning</span>
+            
+            {/* Floating Tab Switches */}
+            <div className="flex bg-white/20 rounded-xl p-1">
+              <Button
+                variant="ghost"
+                size="sm"
+                className={`rounded-lg transition-all duration-300 ${
+                  activeView === "map"
+                    ? "bg-white text-gray-900 shadow-md"
+                    : "text-gray-600 hover:text-gray-900 hover:bg-white/50"
+                }`}
+                onClick={() => setActiveView("map")}
+                data-testid="tab-map"
+              >
+                <Map className="h-4 w-4 mr-2" />
+                Map
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className={`rounded-lg transition-all duration-300 ${
+                  activeView === "itinerary"
+                    ? "bg-white text-gray-900 shadow-md"
+                    : "text-gray-600 hover:text-gray-900 hover:bg-white/50"
+                }`}
+                onClick={() => setActiveView("itinerary")}
+                data-testid="tab-itinerary"
+              >
+                <List className="h-4 w-4 mr-2" />
+                Itinerary
+              </Button>
             </div>
           </div>
         </div>
       </header>
 
-      <div className="flex h-screen pt-16">
-        {/* Trip Planning Form */}
-        <TripForm 
-          onSubmit={handlePlanTrip}
+      {/* Main Map Background - Hero Element */}
+      <div className="absolute inset-0">
+        <MapView 
+          key={completedTrip ? `map-${completedTrip.id}-${Date.now()}` : 'default'}
+          itinerary={completedTrip?.itinerary}
           isLoading={planTripMutation.isPending}
-          completedTrip={completedTrip}
         />
+      </div>
 
-        {/* Main Content Area */}
-        <div className="flex-1 flex flex-col">
-          {/* Content Tabs */}
-          <div className="bg-white border-b border-gray-200">
-            <div className="px-6">
-              <nav className="flex space-x-8" aria-label="Tabs">
-                <Button
-                  variant="ghost"
-                  className={`py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
-                    activeView === "map"
-                      ? "border-primary text-primary"
-                      : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                  }`}
-                  onClick={() => setActiveView("map")}
-                  data-testid="tab-map"
-                >
-                  <Map className="h-4 w-4 mr-2" />
-                  Route Map
-                </Button>
-                <Button
-                  variant="ghost"
-                  className={`py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
-                    activeView === "itinerary"
-                      ? "border-primary text-primary"
-                      : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                  }`}
-                  onClick={() => setActiveView("itinerary")}
-                  data-testid="tab-itinerary"
-                >
-                  <List className="h-4 w-4 mr-2" />
-                  Itinerary Details
-                </Button>
-              </nav>
-            </div>
-          </div>
-
-          {/* Content Views */}
-          {activeView === "map" && (
-            <MapView 
-              key={completedTrip ? `map-${completedTrip.id}-${Date.now()}` : 'default'}
-              itinerary={completedTrip?.itinerary}
-              isLoading={planTripMutation.isPending}
-            />
-          )}
-          
-          {activeView === "itinerary" && (
-            <ItineraryView itinerary={completedTrip?.itinerary} />
-          )}
+      {/* Floating Trip Planning Panel */}
+      <div className="absolute top-24 left-6 w-96 max-h-[calc(100vh-8rem)] z-40 animate-slide-up">
+        <div className="glass-strong rounded-2xl p-6 glass-scrollbar overflow-y-auto">
+          <TripForm 
+            onSubmit={handlePlanTrip}
+            isLoading={planTripMutation.isPending}
+            completedTrip={completedTrip}
+          />
         </div>
       </div>
+
+      {/* Floating Itinerary Panel - Only visible when itinerary tab is active */}
+      {activeView === "itinerary" && (
+        <div className="absolute top-24 right-6 w-96 max-h-[calc(100vh-8rem)] z-40 animate-slide-up">
+          <div className="glass-strong rounded-2xl p-6 glass-scrollbar overflow-y-auto">
+            <ItineraryView itinerary={completedTrip?.itinerary} />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
