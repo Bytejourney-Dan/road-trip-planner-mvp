@@ -33,7 +33,12 @@ Trip Details:
 - Latest check-in time: ${request.checkInTime}
 - Trip Type: ${isRoundTrip ? 'Round Trip (return to starting location)' : 'One Way'}
 
-${request.interests && request.interests.length > 0 ? `- Interests: ${request.interests.join(', ')}` : ''}
+${request.interests && request.interests.length > 0 ? `- Travel Interests: ${request.interests.join(', ')}
+
+IMPORTANT: When selecting attractions, prioritize places that match the traveler's interests. For specific nature types like "Waterfalls", "Desert", "Forest", etc., ensure to include those exact types of natural attractions. For example:
+- If interests include "Waterfalls", prioritize waterfalls in the area
+- If interests include "Desert", include desert landscapes and attractions
+- If interests include "National and State Parks", prioritize parks over other attractions` : ''}
 
 Rules:
 - Assume travel is by car
@@ -42,6 +47,7 @@ Rules:
 - Keep the total number of stops (including start, overnights, destination, and attractions) at or below 25
 - Ensure realistic driving times and distances
 - Include estimated driving times between cities
+- PRIORITIZE attractions that match the traveler's specified interests
 ${isRoundTrip ? '- For round trips: plan the outbound journey to the destination, then plan the return journey back to the starting location within the given dates' : ''}
 
 

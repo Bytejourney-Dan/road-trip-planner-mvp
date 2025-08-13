@@ -341,31 +341,7 @@ export function MapView({ itinerary, isLoading }: MapViewProps) {
         </div>
       )}
 
-      {/* Trip Summary Panel - appears when trip is generated */}
-      {itinerary && (
-        <div className="absolute top-4 left-4 z-50 animate-slide-up" data-testid="trip-summary">
-          <div className="glass-strong rounded-2xl p-4 max-w-xs">
-            <div className="flex items-center space-x-2 mb-3">
-              <CheckCircle className="h-5 w-5 text-emerald-500" />
-              <h3 className="font-semibold text-gray-900">Trip Generated!</h3>
-            </div>
-            <div className="text-sm text-gray-700 space-y-2">
-              <div data-testid="summary-days" className="flex items-center">
-                <span className="font-medium">{itinerary.totalDays}-day</span> 
-                <span className="ml-1">road trip</span>
-              </div>
-              <div data-testid="summary-distance" className="flex items-center">
-                <span className="font-medium">{itinerary.totalDistance} miles</span>
-                <span className="ml-1">total distance</span>
-              </div>
-              <div data-testid="summary-stops" className="flex items-center">
-                <span className="font-medium">{itinerary.days.length} stops</span>
-                <span className="ml-1">planned</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+
 
       {/* Floating Location Info Panel */}
       {selectedLocation && (

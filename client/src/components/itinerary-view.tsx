@@ -1,4 +1,4 @@
-import { Clock, Route, Camera, Bed, TrendingUp } from "lucide-react";
+import { Clock, Route, Camera, Bed, TrendingUp, CheckCircle } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { TripItinerary } from "@/types/trip";
 
@@ -27,6 +27,28 @@ export function ItineraryView({ itinerary }: ItineraryViewProps) {
         <div className="mb-6">
           <h2 className="text-xl font-semibold text-gray-900 mb-2" data-testid="text-itinerary-title">Your Trip Itinerary</h2>
           <p className="text-gray-600" data-testid="text-itinerary-subtitle">Day-by-day breakdown of your road trip adventure</p>
+        </div>
+
+        {/* Trip Summary */}
+        <div className="mb-6 glass-light rounded-xl p-4 animate-fade-in" data-testid="trip-summary">
+          <div className="flex items-center space-x-2 mb-3">
+            <CheckCircle className="h-5 w-5 text-emerald-500" />
+            <h3 className="font-semibold text-gray-900">Trip Generated!</h3>
+          </div>
+          <div className="text-sm text-gray-700 space-y-2">
+            <div data-testid="summary-days" className="flex items-center">
+              <span className="font-medium">{itinerary.totalDays}-day</span> 
+              <span className="ml-1">road trip</span>
+            </div>
+            <div data-testid="summary-distance" className="flex items-center">
+              <span className="font-medium">{itinerary.totalDistance} miles</span>
+              <span className="ml-1">total distance</span>
+            </div>
+            <div data-testid="summary-stops" className="flex items-center">
+              <span className="font-medium">{itinerary.days.length} stops</span>
+              <span className="ml-1">planned</span>
+            </div>
+          </div>
         </div>
 
         {/* Itinerary Cards */}
