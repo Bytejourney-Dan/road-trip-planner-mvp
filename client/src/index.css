@@ -114,19 +114,15 @@
     -webkit-tap-highlight-color: transparent;
   }
   
-  /* Mobile-specific optimizations */
+  /* Subtle mobile enhancements - maintain desktop-first experience */
   @media (max-width: 768px) {
-    .min-h-screen {
-      min-height: 100vh;
-      min-height: -webkit-fill-available;
-    }
-    
-    button, .btn {
-      min-height: 44px;
-    }
-    
     .overflow-y-auto {
       -webkit-overflow-scrolling: touch;
+    }
+    
+    /* Ensure buttons are touch-friendly when needed */
+    button {
+      min-height: 40px;
     }
   }
 }

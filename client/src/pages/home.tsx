@@ -112,8 +112,8 @@ export default function Home() {
               </div>
             </div>
             
-            {/* Mobile Menu Button */}
-            <div className="md:hidden">
+            {/* Mobile Menu Button - only for small screens */}
+            <div className="lg:hidden">
               <Button
                 variant="ghost"
                 size="sm"
@@ -126,7 +126,7 @@ export default function Home() {
             </div>
             
             {/* Desktop Tab Switches */}
-            <div className="hidden md:flex bg-white/20 rounded-xl p-1">
+            <div className="hidden lg:flex bg-white/20 rounded-xl p-1">
               <Button
                 variant="ghost"
                 size="sm"
@@ -175,7 +175,7 @@ export default function Home() {
         
         {/* Mobile Navigation Menu */}
         {isMobileMenuOpen && (
-          <div className="md:hidden glass-strong border-t border-white/20 px-4 py-3">
+          <div className="lg:hidden glass-strong border-t border-white/20 px-4 py-3">
             <div className="grid grid-cols-3 gap-2">
               <Button
                 variant="ghost"
@@ -234,12 +234,12 @@ export default function Home() {
       </header>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col md:flex-row">
+      <div className="flex-1 flex flex-col lg:flex-row">
         {/* Desktop Layout: Left Panel - Trip Planning Form */}
         <div className={`
-          ${activeView === "form" ? "block" : "hidden"} md:block
-          w-full md:w-96 glass-strong border-b md:border-r md:border-b-0 border-white/20 
-          p-4 md:p-6 overflow-y-auto glass-scrollbar
+          ${activeView === "form" ? "block" : "hidden"} lg:block
+          w-full lg:w-96 glass-strong border-b lg:border-r lg:border-b-0 border-white/20 
+          p-6 overflow-y-auto glass-scrollbar
           ${activeView === "form" ? "flex-1" : ""}
         `}>
           <TripForm 

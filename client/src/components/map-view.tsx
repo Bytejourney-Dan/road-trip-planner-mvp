@@ -609,10 +609,10 @@ export function MapView({ itinerary, isLoading, onItineraryUpdate }: MapViewProp
 
 
 
-      {/* Floating Location Info Panel - Mobile Optimized */}
+      {/* Floating Location Info Panel */}
       {selectedLocation && (
-        <div className="absolute inset-x-2 md:inset-x-auto md:top-4 md:right-4 bottom-20 md:bottom-auto w-auto md:w-80 max-h-[60vh] md:max-h-[calc(100%-2rem)] z-50 animate-slide-up" data-testid="location-info-panel">
-          <div className="glass-strong rounded-2xl p-4 md:p-6 glass-scrollbar overflow-y-auto">
+        <div className="absolute top-4 right-4 w-80 max-h-[calc(100%-2rem)] z-50 animate-slide-up" data-testid="location-info-panel">
+          <div className="glass-strong rounded-2xl p-6 glass-scrollbar overflow-y-auto">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-gray-900" data-testid="text-location-title">
                 {selectedLocation.type === 'start' && '🚀 Trip Start'}
@@ -869,20 +869,20 @@ export function MapView({ itinerary, isLoading, onItineraryUpdate }: MapViewProp
             </div>
             
             {isEditMode && (
-              <div className="text-xs md:text-sm text-gray-700 bg-white/50 rounded-lg p-2 md:p-3">
+              <div className="text-sm text-gray-700 bg-white/50 rounded-lg p-3">
                 <p className="font-medium mb-1">Edit Mode Active</p>
-                <p>• Tap map to add attractions</p>
-                <p>• Tap markers to remove</p>
+                <p>• Click map to add attractions</p>
+                <p>• Click markers to remove</p>
               </div>
             )}
           </div>
         </div>
       )}
 
-      {/* Floating Map Controls - Mobile Optimized */}
-      <div className={`absolute ${selectedLocation ? 'bottom-4 right-2 md:right-4' : 'top-4 right-2 md:right-4'} glass rounded-xl p-2 space-y-2 transition-all duration-300`} data-testid="map-controls">
+      {/* Floating Map Controls */}
+      <div className={`absolute ${selectedLocation ? 'bottom-4 right-4' : 'top-4 right-4'} glass rounded-xl p-2 space-y-2 transition-all duration-300`} data-testid="map-controls">
         <button 
-          className="block w-8 h-8 md:w-10 md:h-10 text-gray-700 hover:text-blue-600 hover:bg-white/30 rounded-lg flex items-center justify-center transition-all duration-200 glass-hover"
+          className="block w-10 h-10 text-gray-700 hover:text-blue-600 hover:bg-white/30 rounded-lg flex items-center justify-center transition-all duration-200 glass-hover"
           onClick={() => {
             if (googleMapRef.current) {
               googleMapRef.current.setZoom(googleMapRef.current.getZoom()! + 1);
@@ -890,10 +890,10 @@ export function MapView({ itinerary, isLoading, onItineraryUpdate }: MapViewProp
           }}
           data-testid="button-zoom-in"
         >
-          <ZoomIn className="h-4 w-4 md:h-5 md:w-5" />
+          <ZoomIn className="h-5 w-5" />
         </button>
         <button 
-          className="block w-8 h-8 md:w-10 md:h-10 text-gray-700 hover:text-blue-600 hover:bg-white/30 rounded-lg flex items-center justify-center transition-all duration-200 glass-hover"
+          className="block w-10 h-10 text-gray-700 hover:text-blue-600 hover:bg-white/30 rounded-lg flex items-center justify-center transition-all duration-200 glass-hover"
           onClick={() => {
             if (googleMapRef.current) {
               googleMapRef.current.setZoom(googleMapRef.current.getZoom()! - 1);
@@ -901,10 +901,10 @@ export function MapView({ itinerary, isLoading, onItineraryUpdate }: MapViewProp
           }}
           data-testid="button-zoom-out"
         >
-          <ZoomOut className="h-4 w-4 md:h-5 md:w-5" />
+          <ZoomOut className="h-5 w-5" />
         </button>
         <button 
-          className="block w-8 h-8 md:w-10 md:h-10 text-gray-700 hover:text-blue-600 hover:bg-white/30 rounded-lg flex items-center justify-center transition-all duration-200 glass-hover"
+          className="block w-10 h-10 text-gray-700 hover:text-blue-600 hover:bg-white/30 rounded-lg flex items-center justify-center transition-all duration-200 glass-hover"
           onClick={() => {
             if (googleMapRef.current && itinerary) {
               const bounds = new window.google.maps.LatLngBounds();
@@ -922,7 +922,7 @@ export function MapView({ itinerary, isLoading, onItineraryUpdate }: MapViewProp
           }}
           data-testid="button-fit-bounds"
         >
-          <Maximize className="h-4 w-4 md:h-5 md:w-5" />
+          <Maximize className="h-5 w-5" />
         </button>
       </div>
 
