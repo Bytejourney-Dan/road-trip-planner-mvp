@@ -383,7 +383,6 @@ export function TripForm({ onSubmit, isLoading, completedTrip }: TripFormProps) 
             <div className="space-y-3 max-h-64 overflow-y-auto glass-scrollbar" data-testid="interests-checkboxes">
               <div className="grid grid-cols-2 gap-3">
                 {[
-                  "National and State Parks",
                   "Nature",
                   "Beaches and coast",
                   "Historic sites",
@@ -417,6 +416,7 @@ export function TripForm({ onSubmit, isLoading, completedTrip }: TripFormProps) 
                   <Label className="text-xs font-semibold text-gray-700 mb-2 block">Nature Types</Label>
                   <div className="grid grid-cols-2 gap-2 text-xs">
                     {[
+                      "National and State Parks",
                       "Waterfalls",
                       "Desert",
                       "Forest",
@@ -432,7 +432,7 @@ export function TripForm({ onSubmit, isLoading, completedTrip }: TripFormProps) 
                           checked={selectedNatureTypes.includes(natureType)}
                           onCheckedChange={(checked) => handleNatureTypeToggle(natureType, !!checked)}
                           disabled={isLoading}
-                          data-testid={`checkbox-nature-${natureType.toLowerCase()}`}
+                          data-testid={`checkbox-nature-${natureType.toLowerCase().replace(/\s+/g, '-')}`}
                           className="border-white/30 data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-green-500 data-[state=checked]:to-emerald-500 data-[state=checked]:border-green-400 h-3 w-3"
                         />
                         <Label 
