@@ -12,12 +12,13 @@ export async function geocodeLocation(location: string): Promise<GeocodeResult> 
   }
   
   try {
+    // Use Places API Text Search since you have that enabled
     const response = await fetch(
-      `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(location)}&key=${apiKey}`
+      `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(location)}&key=${apiKey}`
     );
     
     if (!response.ok) {
-      throw new Error(`Geocoding API error: ${response.status}`);
+      throw new Error(`Places API error: ${response.status}`);
     }
     
     const data = await response.json();
@@ -27,11 +28,11 @@ export async function geocodeLocation(location: string): Promise<GeocodeResult> 
     }
     
     if (data.status === 'INVALID_REQUEST') {
-      throw new Error(`Invalid geocoding request for location: ${location}`);
+      throw new Error(`Invalid Places API request for location: ${location}`);
     }
     
     if (data.status !== 'OK' || !data.results?.length) {
-      throw new Error(`Failed to geocode location: ${location}. Status: ${data.status}`);
+      throw new Error(`Failed to find location: ${location}. Status: ${data.status}`);
     }
     
     const result = data.results[0];
@@ -41,7 +42,7 @@ export async function geocodeLocation(location: string): Promise<GeocodeResult> 
       formattedAddress: result.formatted_address,
     };
   } catch (error) {
-    console.error("Geocoding error:", error);
+    console.error("Places API error:", error);
     throw new Error(`Failed to geocode location: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 }
