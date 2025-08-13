@@ -17,6 +17,8 @@ interface MapViewProps {
 export function MapView({ itinerary, isLoading }: MapViewProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const googleMapRef = useRef<any | null>(null);
+  const markersRef = useRef<any[]>([]);
+  const polylinesRef = useRef<any[]>([]);
 
   useEffect(() => {
     if (!mapRef.current) return;
@@ -58,7 +60,10 @@ export function MapView({ itinerary, isLoading }: MapViewProps) {
     if (!googleMapRef.current || !itinerary) return;
 
     // Clear existing markers and polylines
-    // Note: In a production app, you'd want to store references to markers/polylines to clear them properly
+    markersRef.current.forEach(marker => marker.setMap(null));
+    polylinesRef.current.forEach(polyline => polyline.setMap(null));
+    markersRef.current = [];
+    polylinesRef.current = [];
 
     const bounds = new window.google.maps.LatLngBounds();
     const markers: any[] = [];
@@ -85,6 +90,7 @@ export function MapView({ itinerary, isLoading }: MapViewProps) {
         });
 
         markers.push(marker);
+        markersRef.current.push(marker);
         bounds.extend(marker.getPosition()!);
         
         routeCoordinates.push(new window.google.maps.LatLng(day.overnightCoordinates.lat, day.overnightCoordinates.lng));
@@ -99,6 +105,7 @@ export function MapView({ itinerary, isLoading }: MapViewProps) {
           label: 'A', // Use Google's built-in letter labels
         });
         markers.push(startMarker);
+        markersRef.current.push(startMarker);
         bounds.extend(startMarker.getPosition()!);
       }
 
@@ -110,6 +117,7 @@ export function MapView({ itinerary, isLoading }: MapViewProps) {
           label: 'B', // Use Google's built-in letter labels
         });
         markers.push(endMarker);
+        markersRef.current.push(endMarker);
         bounds.extend(endMarker.getPosition()!);
       }
     });
@@ -169,7 +177,7 @@ export function MapView({ itinerary, isLoading }: MapViewProps) {
           if (route.polyline && route.polyline.encodedPolyline) {
             const decodedPath = window.google.maps.geometry.encoding.decodePath(route.polyline.encodedPolyline);
             
-            new window.google.maps.Polyline({
+            const polyline = new window.google.maps.Polyline({
               path: decodedPath,
               geodesic: true,
               strokeColor: '#4285F4',
@@ -177,13 +185,14 @@ export function MapView({ itinerary, isLoading }: MapViewProps) {
               strokeWeight: 4,
               map: googleMapRef.current,
             });
+            polylinesRef.current.push(polyline);
           }
         }
       })
       .catch(error => {
         console.log('Routes API not available, using simple polyline');
         // Fallback to simple polyline
-        new window.google.maps.Polyline({
+        const polyline = new window.google.maps.Polyline({
           path: routeCoordinates,
           geodesic: true,
           strokeColor: '#4285F4',
@@ -191,6 +200,7 @@ export function MapView({ itinerary, isLoading }: MapViewProps) {
           strokeWeight: 3,
           map: googleMapRef.current,
         });
+        polylinesRef.current.push(polyline);
       });
     }
 

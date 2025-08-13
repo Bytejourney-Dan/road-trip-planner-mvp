@@ -23,6 +23,8 @@ export default function Home() {
     },
     onSuccess: (trip) => {
       setCompletedTrip(trip);
+      // Force map view to be active to show the new route immediately
+      setActiveView("map");
       toast({
         title: "Trip Generated Successfully!",
         description: `Your ${trip.itinerary?.totalDays}-day road trip is ready to explore.`,
