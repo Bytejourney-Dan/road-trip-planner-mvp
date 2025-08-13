@@ -10,6 +10,14 @@ The application follows a modern full-stack architecture with React frontend, Ex
 
 Preferred communication style: Simple, everyday language.
 
+## Recent Changes
+
+**August 13, 2025**
+- ✅ **Comprehensive Location Editing**: Added interactive editing functionality with click-to-add attractions, removal capabilities, and real-time route updates
+- ✅ **Git Integration Setup**: Enhanced .gitignore for security, created comprehensive README and GitHub setup guide
+- ✅ **Edit Mode Interface**: Blue toggle button, green update button, smart day assignment for new attractions
+- ✅ **Route Optimization**: Routes flow through custom attractions as waypoints, not just overnight locations
+
 ## System Architecture
 
 ### Frontend Architecture
