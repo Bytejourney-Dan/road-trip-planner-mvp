@@ -15,10 +15,11 @@ interface MapViewProps {
 }
 
 interface LocationInfo {
-  type: 'start' | 'overnight' | 'end';
+  type: 'start' | 'overnight' | 'end' | 'attraction';
   name: string;
   dayNumber?: number;
   date?: string;
+  description?: string;
   attractions?: Array<{ name: string; description: string }>;
   route?: {
     from: string;
@@ -151,13 +152,22 @@ export function MapView({ itinerary, isLoading }: MapViewProps) {
         routeCoordinates.push(new window.google.maps.LatLng(day.overnightCoordinates.lat, day.overnightCoordinates.lng));
       }
 
-      // Add markers for route start/end if available
+      // Add markers for route start/end if available (without A/B labels)
       if (index === 0 && day.route.fromCoordinates) {
         const startMarker = new window.google.maps.Marker({
           position: { lat: day.route.fromCoordinates.lat, lng: day.route.fromCoordinates.lng },
           map: googleMapRef.current,
           title: `Start: ${day.route.from}`,
-          label: 'A', // Use Google's built-in letter labels
+          icon: {
+            url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10" fill="#10b981" stroke="#fff" stroke-width="2"/>
+                <circle cx="12" cy="12" r="3" fill="#fff"/>
+              </svg>
+            `),
+            scaledSize: new window.google.maps.Size(24, 24),
+            anchor: new window.google.maps.Point(12, 12)
+          }
         });
 
         // Add click handler for start location
@@ -181,7 +191,16 @@ export function MapView({ itinerary, isLoading }: MapViewProps) {
           position: { lat: day.route.toCoordinates.lat, lng: day.route.toCoordinates.lng },
           map: googleMapRef.current,
           title: `End: ${day.route.to}`,
-          label: 'B', // Use Google's built-in letter labels
+          icon: {
+            url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10" fill="#dc2626" stroke="#fff" stroke-width="2"/>
+                <circle cx="12" cy="12" r="3" fill="#fff"/>
+              </svg>
+            `),
+            scaledSize: new window.google.maps.Size(24, 24),
+            anchor: new window.google.maps.Point(12, 12)
+          }
         });
 
         // Add click handler for end location
@@ -197,6 +216,49 @@ export function MapView({ itinerary, isLoading }: MapViewProps) {
         markers.push(endMarker);
         markersRef.current.push(endMarker);
         bounds.extend(endMarker.getPosition()!);
+      }
+
+      // Add markers for attractions
+      if (day.attractions && day.attractions.length > 0) {
+        day.attractions.forEach((attraction, attractionIndex) => {
+          // For now, place attractions near the overnight location with small random offset
+          // In a real app, you'd geocode each attraction individually
+          if (day.overnightCoordinates) {
+            const attractionMarker = new window.google.maps.Marker({
+              position: { 
+                lat: day.overnightCoordinates.lat + (Math.random() - 0.5) * 0.02,
+                lng: day.overnightCoordinates.lng + (Math.random() - 0.5) * 0.02
+              },
+              map: googleMapRef.current,
+              title: `${attraction.name}`,
+              icon: {
+                url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="8" fill="#f59e0b" stroke="#fff" stroke-width="2"/>
+                    <circle cx="12" cy="12" r="2" fill="#fff"/>
+                  </svg>
+                `),
+                scaledSize: new window.google.maps.Size(20, 20),
+                anchor: new window.google.maps.Point(10, 10)
+              }
+            });
+
+            // Add click handler for attraction
+            attractionMarker.addListener('click', () => {
+              setSelectedLocation({
+                type: 'attraction',
+                name: attraction.name,
+                description: attraction.description,
+                dayNumber: day.dayNumber,
+                date: day.date
+              });
+            });
+
+            markers.push(attractionMarker);
+            markersRef.current.push(attractionMarker);
+            bounds.extend(attractionMarker.getPosition()!);
+          }
+        });
       }
     });
 
@@ -337,6 +399,32 @@ export function MapView({ itinerary, isLoading }: MapViewProps) {
             <MapPin className="h-12 w-12 mb-3 text-blue-400 mx-auto animate-float" />
             <h3 className="text-base font-semibold mb-2 text-gray-900" data-testid="text-empty-state">Ready to Plan Your Adventure?</h3>
             <p className="text-sm text-gray-700" data-testid="text-empty-instructions">Fill out the trip details to see your route here</p>
+          </div>
+        </div>
+      )}
+
+      {/* Trip Summary Panel - appears when trip is generated */}
+      {itinerary && (
+        <div className="absolute top-4 left-4 z-50 animate-slide-up" data-testid="trip-summary">
+          <div className="glass-strong rounded-2xl p-4 max-w-xs">
+            <div className="flex items-center space-x-2 mb-3">
+              <CheckCircle className="h-5 w-5 text-emerald-500" />
+              <h3 className="font-semibold text-gray-900">Trip Summary</h3>
+            </div>
+            <div className="text-sm text-gray-700 space-y-2">
+              <div data-testid="summary-days" className="flex items-center">
+                <span className="font-medium">{itinerary.totalDays}-day</span> 
+                <span className="ml-1">road trip</span>
+              </div>
+              <div data-testid="summary-distance" className="flex items-center">
+                <span className="font-medium">{itinerary.totalDistance} miles</span>
+                <span className="ml-1">total distance</span>
+              </div>
+              <div data-testid="summary-stops" className="flex items-center">
+                <span className="font-medium">{itinerary.days.length} stops</span>
+                <span className="ml-1">planned</span>
+              </div>
+            </div>
           </div>
         </div>
       )}
