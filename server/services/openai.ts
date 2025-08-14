@@ -35,6 +35,22 @@ Trip Details:
 - Latest check-in time: ${request.checkInTime}
 - Trip Type: ${isRoundTrip ? 'Round Trip (return to starting location)' : 'One Way'}
 
+${isRoundTrip ? `
+ROUND TRIP ROUTE OPTIMIZATION:
+For this round trip, you MUST create two distinct routes to minimize overlap and maximize the travel experience:
+
+1. OUTBOUND JOURNEY: Plan the most direct or scenic route from ${request.startLocation} to ${request.endLocation}
+2. RETURN JOURNEY: Plan a completely different route back to ${request.startLocation} that avoids the outbound path
+
+Route Strategy Examples:
+- If one direction goes inland, the other should go coastal
+- If one uses major highways, the other should use scenic backroads
+- If one goes through mountains, the other could go through valleys or plains
+- Choose different intermediate cities for overnight stops on each leg
+- Consider different geographic features: desert vs forest, urban vs rural, etc.
+
+This creates a true loop experience where travelers discover new places on both legs of the journey.` : ''}
+
 ${request.interests && request.interests.length > 0 ? `- Travel Interests: ${request.interests.join(', ')}
 
 CRITICAL REQUIREMENTS: 
@@ -63,7 +79,13 @@ Rules:
 - Include exactly 5 attractions per day that are within 100 miles of the overnight stop
 - The initial route should ONLY connect overnight stops - do not include attractions in the driving route
 - Include attractions that match the traveler's specified interests
-${isRoundTrip ? '- For round trips: plan the outbound journey to the destination, then plan the return journey back to the starting location within the given dates' : ''}
+${isRoundTrip ? `- For round trips: CREATE A TRUE ROUND TRIP EXPERIENCE by planning TWO DIFFERENT ROUTES:
+  * OUTBOUND ROUTE: Plan the journey from start to destination using one route
+  * RETURN ROUTE: Plan the return journey using a COMPLETELY DIFFERENT route to minimize overlap
+  * Choose overnight stops on the return that are in different cities/towns than the outbound journey
+  * This creates a loop experience where travelers see different scenery and attractions on the way back
+  * The goal is to maximize new experiences and minimize driving the same roads twice
+  * Examples: If outbound goes through mountains, return could go through coastal areas; if outbound is inland, return could be along the coast` : ''}
 
 
 Return the plan in STRICT JSON format with this exact structure:

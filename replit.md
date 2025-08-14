@@ -22,6 +22,9 @@ Preferred communication style: Simple, everyday language.
 - ✅ **Map Container Fixes**: Enhanced height inheritance and z-index positioning for proper map display
 - ✅ **Side-by-Side Layout**: Results page now shows map (2/3 width) and itinerary (1/3 width) simultaneously on desktop
 - ✅ **Enhanced Itinerary Sidebar**: Structured itinerary panel with header, statistics, and improved visual hierarchy
+- ✅ **Round Trip Route Optimization**: Updated ChatGPT prompt to generate different outbound and return routes, minimizing overlap for true round trip experiences
+- ✅ **Interests Field Restoration**: Added back travel interests selection with Nature types multi-select functionality
+- ✅ **Dropdown Z-Index Fix**: Fixed location dropdown positioning to appear above all page elements
 
 **August 13, 2025**
 - ✅ **Comprehensive Location Editing**: Added interactive editing functionality with click-to-add attractions, removal capabilities, and real-time route updates
