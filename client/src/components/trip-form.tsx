@@ -14,9 +14,10 @@ interface TripFormProps {
   onSubmit: (data: TripFormData) => void;
   isLoading: boolean;
   completedTrip?: Trip;
+  showMinimal?: boolean;
 }
 
-export function TripForm({ onSubmit, isLoading, completedTrip }: TripFormProps) {
+export function TripForm({ onSubmit, isLoading, completedTrip, showMinimal = false }: TripFormProps) {
   const [formData, setFormData] = useState<TripFormData>({
     startLocation: "",
     endLocation: "",

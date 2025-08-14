@@ -12,6 +12,13 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+**August 14, 2025**
+- ✅ **Two-Page Flow Architecture**: Converted from permanent side-by-side layout to landing page → results page flow
+- ✅ **Landing Page Design**: Hero section with feature highlights, statistics, and prominent trip form
+- ✅ **Route Connection Fix**: Routes now only connect overnight stops (not attractions) preventing Google Maps API waypoint limit errors
+- ✅ **Interactive Map Features**: Added click-to-add locations with day selection panel, integrated edit mode controls
+- ✅ **Smooth Page Transitions**: Session storage for trip data persistence across page navigation
+
 **August 13, 2025**
 - ✅ **Comprehensive Location Editing**: Added interactive editing functionality with click-to-add attractions, removal capabilities, and real-time route updates
 - ✅ **Git Integration Setup**: Enhanced .gitignore for security, created comprehensive README and GitHub setup guide
@@ -56,10 +63,12 @@ Preferred communication style: Simple, everyday language.
 - **Features**: Interactive markers, route polylines, and location pins
 
 ### Component Architecture
-- **Trip Form**: Collects user input with validation (removed max daily driving hours as requested)
-- **Map View**: Interactive Google Maps with route visualization using secure frontend API key
-- **Itinerary View**: Structured display of day-by-day travel plans
-- **Loading States**: User feedback during AI processing
+- **Landing Page**: Hero section with trip form, feature highlights, and call-to-action
+- **Results Page**: Split view with map/itinerary toggle and comprehensive trip management
+- **Trip Form**: Collects user input with validation, supports minimal and full layouts
+- **Map View**: Interactive Google Maps with route visualization, location editing, and attraction management
+- **Itinerary View**: Structured display of day-by-day travel plans with customization options
+- **Loading States**: User feedback during AI processing with smooth transitions
 - **Error Handling**: Comprehensive error boundaries and user notifications
 
 ### Development Patterns
