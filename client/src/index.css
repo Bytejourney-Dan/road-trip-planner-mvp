@@ -265,4 +265,15 @@
   .animate-slide-up {
     animation: slideUp 0.8s ease-out;
   }
+
+  /* Ensure dropdowns appear above all other elements */
+  .location-dropdown {
+    z-index: 9999 !important;
+    position: relative;
+  }
+
+  /* Fix for select dropdowns z-index */
+  [data-radix-popper-content-wrapper] {
+    z-index: 9999 !important;
+  }
 }

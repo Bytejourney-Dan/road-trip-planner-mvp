@@ -195,7 +195,7 @@ export function TripForm({ onSubmit, isLoading, completedTrip, showMinimal = fal
               <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
               
               {showStartSuggestions && filteredStartCities.length > 0 && (
-                <div className="absolute z-[60] w-full mt-2 glass-strong rounded-xl shadow-lg max-h-60 overflow-y-auto glass-scrollbar">
+                <div className="absolute z-[9999] w-full mt-2 glass-strong rounded-xl shadow-lg max-h-60 overflow-y-auto glass-scrollbar">
                   {filteredStartCities.map((city, index) => (
                     <button
                       key={index}
@@ -237,7 +237,7 @@ export function TripForm({ onSubmit, isLoading, completedTrip, showMinimal = fal
               <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
               
               {showEndSuggestions && filteredEndCities.length > 0 && (
-                <div className="absolute z-[60] w-full mt-2 glass-strong rounded-xl shadow-lg max-h-60 overflow-y-auto glass-scrollbar">
+                <div className="absolute z-[9999] w-full mt-2 glass-strong rounded-xl shadow-lg max-h-60 overflow-y-auto glass-scrollbar">
                   {filteredEndCities.map((city, index) => (
                     <button
                       key={index}
@@ -375,7 +375,6 @@ export function TripForm({ onSubmit, isLoading, completedTrip, showMinimal = fal
           </div>
 
           {/* Travel Interests */}
-          {!showMinimal && (
           <div className="glass-light p-4 rounded-xl">
             <div className="flex items-center mb-4">
               <Sparkles className="h-4 w-4 text-purple-500 mr-2" />
@@ -458,7 +457,6 @@ export function TripForm({ onSubmit, isLoading, completedTrip, showMinimal = fal
               </div>
             )}
           </div>
-          )}
 
           {/* Submit Button */}
           <Button 
