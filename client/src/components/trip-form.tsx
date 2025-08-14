@@ -169,7 +169,7 @@ export function TripForm({ onSubmit, isLoading, completedTrip, showMinimal = fal
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Trip Locations */}
-        <div className="space-y-4">
+        <div className={showMinimal ? "grid grid-cols-1 md:grid-cols-2 gap-4" : "space-y-4"}>
           <div className="glass-light p-4 rounded-xl">
             <Label htmlFor="startLocation" className="flex items-center text-sm font-semibold text-gray-800 mb-3">
               <MapPin className="h-4 w-4 text-emerald-500 mr-2" />
@@ -287,7 +287,7 @@ export function TripForm({ onSubmit, isLoading, completedTrip, showMinimal = fal
               <Label className="text-sm font-semibold text-gray-800">Travel Dates & Times</Label>
             </div>
             
-            <div className="grid grid-cols-2 gap-3">
+            <div className={showMinimal ? "grid grid-cols-1 md:grid-cols-4 gap-3" : "grid grid-cols-2 gap-3"}>
               <div>
                 <Label htmlFor="startDate" className="block text-sm font-medium text-gray-700 mb-2">Start Date</Label>
                 <Input
@@ -336,7 +336,7 @@ export function TripForm({ onSubmit, isLoading, completedTrip, showMinimal = fal
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className={showMinimal ? "grid grid-cols-1 md:grid-cols-4 gap-3" : "grid grid-cols-2 gap-3"}>
               <div>
                 <Label htmlFor="endDate" className="block text-sm font-medium text-gray-700 mb-2">End Date</Label>
                 <Input
@@ -375,6 +375,7 @@ export function TripForm({ onSubmit, isLoading, completedTrip, showMinimal = fal
           </div>
 
           {/* Travel Interests */}
+          {!showMinimal && (
           <div className="glass-light p-4 rounded-xl">
             <div className="flex items-center mb-4">
               <Sparkles className="h-4 w-4 text-purple-500 mr-2" />
@@ -457,6 +458,7 @@ export function TripForm({ onSubmit, isLoading, completedTrip, showMinimal = fal
               </div>
             )}
           </div>
+          )}
 
           {/* Submit Button */}
           <Button 

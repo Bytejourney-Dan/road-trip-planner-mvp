@@ -107,8 +107,8 @@ export default function Landing() {
             </div>
           </div>
 
-          {/* Centered Trip Form */}
-          <div className="w-full max-w-md glass-strong rounded-3xl p-6 lg:p-8">
+          {/* Centered Trip Form - Wide Layout */}
+          <div className="w-full max-w-4xl glass-strong rounded-3xl p-6 lg:p-8">
             <div className="mb-6 text-center">
               <h3 className="text-xl font-semibold text-gray-900 mb-2">Start Planning</h3>
               <p className="text-sm text-gray-600">Tell us about your dream road trip</p>
