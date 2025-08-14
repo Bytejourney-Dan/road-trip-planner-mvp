@@ -332,16 +332,9 @@ export function MapView({ itinerary, isLoading, onItineraryUpdate }: MapViewProp
           map: googleMapRef.current,
           title: `Day ${day.dayNumber}: ${day.overnightLocation}`,
           icon: {
-            url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
-              <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40" fill="none">
-                <circle cx="20" cy="20" r="18" fill="#3b82f6" stroke="#fff" stroke-width="3"/>
-                <text x="20" y="26" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14" font-weight="bold">
-                  ${day.dayNumber}
-                </text>
-              </svg>
-            `),
-            scaledSize: new window.google.maps.Size(40, 40),
-            anchor: new window.google.maps.Point(20, 20)
+            url: 'https://maps.google.com/mapfiles/ms/icons/red-dot.png',
+            scaledSize: new window.google.maps.Size(32, 32),
+            anchor: new window.google.maps.Point(16, 32)
           }
         });
 

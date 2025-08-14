@@ -36,20 +36,27 @@ Trip Details:
 - Trip Type: ${isRoundTrip ? 'Round Trip (return to starting location)' : 'One Way'}
 
 ${isRoundTrip ? `
-ROUND TRIP ROUTE OPTIMIZATION:
-For this round trip, you MUST create two distinct routes to minimize overlap and maximize the travel experience:
+CRITICAL ROUND TRIP REQUIREMENTS - NO EXCEPTIONS:
+This is a ROUND TRIP that MUST form a true loop with minimal overlap. Follow these MANDATORY requirements:
 
-1. OUTBOUND JOURNEY: Plan the most direct or scenic route from ${request.startLocation} to ${request.endLocation}
-2. RETURN JOURNEY: Plan a completely different route back to ${request.startLocation} that avoids the outbound path
+1. OUTBOUND ROUTE (${request.startLocation} → ${request.endLocation}):
+   - Plan one specific route with 2-3 overnight stops
+   - Use specific highways, cities, and geographic regions
 
-Route Strategy Examples:
-- If one direction goes inland, the other should go coastal
-- If one uses major highways, the other should use scenic backroads
-- If one goes through mountains, the other could go through valleys or plains
-- Choose different intermediate cities for overnight stops on each leg
-- Consider different geographic features: desert vs forest, urban vs rural, etc.
+2. RETURN ROUTE (${request.endLocation} → ${request.startLocation}):
+   - MUST use a completely different path that avoids ALL outbound cities
+   - Choose overnight stops that are 100+ miles away from ANY outbound overnight city
+   - Use different highways, mountain passes, coastal routes, or interstate systems
+   - Create geographic separation (if outbound is I-5, return could be I-101 coastal or inland I-99)
 
-This creates a true loop experience where travelers discover new places on both legs of the journey.` : ''}
+SPECIFIC ROUTE SEPARATION STRATEGIES:
+- California trips: If outbound uses I-5 (Central Valley), return should use Highway 1 (Coast) or I-395 (Eastern Sierra)
+- Cross-country: If outbound uses northern states, return through southern states
+- Regional: If outbound goes through mountains, return through valleys or coastal plains
+- NEVER reuse the same overnight cities on both legs
+- Maintain 100+ mile separation between outbound and return overnight stops
+
+The result should look like a large loop on the map, not a back-and-forth on the same roads.` : ''}
 
 ${request.interests && request.interests.length > 0 ? `- Travel Interests: ${request.interests.join(', ')}
 
@@ -79,13 +86,12 @@ Rules:
 - Include exactly 5 attractions per day that are within 100 miles of the overnight stop
 - The initial route should ONLY connect overnight stops - do not include attractions in the driving route
 - Include attractions that match the traveler's specified interests
-${isRoundTrip ? `- For round trips: CREATE A TRUE ROUND TRIP EXPERIENCE by planning TWO DIFFERENT ROUTES:
-  * OUTBOUND ROUTE: Plan the journey from start to destination using one route
-  * RETURN ROUTE: Plan the return journey using a COMPLETELY DIFFERENT route to minimize overlap
-  * Choose overnight stops on the return that are in different cities/towns than the outbound journey
-  * This creates a loop experience where travelers see different scenery and attractions on the way back
-  * The goal is to maximize new experiences and minimize driving the same roads twice
-  * Examples: If outbound goes through mountains, return could go through coastal areas; if outbound is inland, return could be along the coast` : ''}
+${isRoundTrip ? `- ROUND TRIP MANDATORY RULES:
+  * ZERO OVERLAP TOLERANCE: Return route cannot share the same highways or cities as outbound
+  * GEOGRAPHIC SEPARATION: Maintain minimum 100-mile distance between outbound and return overnight cities
+  * DIFFERENT ROUTE SYSTEMS: Use completely different interstate systems, highways, or geographic corridors
+  * LOOP FORMATION: The final route should form a visible loop on the map, not a linear back-and-forth
+  * DISTINCT EXPERIENCES: Each leg should offer unique landscapes, cities, and attractions` : ''}
 
 
 Return the plan in STRICT JSON format with this exact structure:
