@@ -36,6 +36,19 @@ app.use((req, res, next) => {
   next();
 });
 
+app.get("/health", (_req, res) => {
+  res.status(200).json({ status: "ok" });
+});
+
+app.get("/debug-env", (_req, res) => {
+  res.json({
+    env: process.env.NODE_ENV,
+    port: process.env.PORT,
+  });
+});
+
+
+
 (async () => {
   const server = await registerRoutes(app);
 

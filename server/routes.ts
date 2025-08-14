@@ -6,6 +6,57 @@ import { generateTripItinerary } from "./services/openai";
 
 import { geocodeItinerary } from "./services/maps";
 
+// Geocode city names → lat/lng using Geocoding API (since you enabled it)
+async function geocodeStopsByName(names: string[], apiKey: string) {
+  const out: Array<{ name: string; lat: number; lng: number }> = [];
+  for (const name of names) {
+    const url =
+      "https://maps.googleapis.com/maps/api/geocode/json?address=" +
+      encodeURIComponent(name) +
+      "&key=" +
+      apiKey;
+
+    const r = await fetch(url);
+    const j = await r.json();
+
+    if (!j.results?.[0]) {
+      throw new Error(`Geocode failed for "${name}": ${JSON.stringify(j)}`);
+    }
+    const loc = j.results[0].geometry.location;
+    out.push({ name, lat: loc.lat, lng: loc.lng });
+  }
+  return out;
+}
+
+function toRoutesBodyFromStops(
+  stops: Array<{ name: string; lat: number; lng: number }>
+) {
+  const [origin, ...rest] = stops;
+  const destination = rest.pop()!;
+  return {
+    origin: {
+      location: {
+        latLng: { latitude: origin.lat, longitude: origin.lng },
+      },
+    },
+    destination: {
+      location: {
+        latLng: { latitude: destination.lat, longitude: destination.lng },
+      },
+    },
+    intermediates: rest.map((s) => ({
+      location: {
+        latLng: { latitude: s.lat, longitude: s.lng },
+      },
+    })),
+    travelMode: "DRIVE",
+    routingPreference: "TRAFFIC_AWARE",
+    units: "IMPERIAL",
+  };
+}
+
+
+
 export async function registerRoutes(app: Express): Promise<Server> {
   // Serve Google Maps API key to frontend
   app.get("/api/config/maps-key", (req, res) => {
@@ -14,38 +65,111 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
-  // Routes API endpoint
+  // Routes API endpoint — patched with logging + proper v2 body handling
   app.post("/api/routes", async (req, res) => {
     try {
-      const routeRequest = req.body;
       const apiKey = process.env.GOOGLE_MAPS_SERVER_API_KEY;
-      
       if (!apiKey) {
         return res.status(500).json({ error: "Google Maps Server API key not configured" });
       }
 
-      const response = await fetch(`https://routes.googleapis.com/directions/v2:computeRoutes`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Goog-Api-Key': apiKey,
-          'X-Goog-FieldMask': 'routes.duration,routes.distanceMeters,routes.polyline.encodedPolyline'
-        },
-        body: JSON.stringify(routeRequest)
-      });
+      // 1) LOG what the client sent (so you can see shape & values in Replit console)
+      console.log("CLIENT /api/routes payload:", JSON.stringify(req.body));
 
-      if (!response.ok) {
-        console.log('Routes API error:', response.status, response.statusText);
-        return res.status(response.status).json({ error: 'Routes API request failed' });
+      // 2) Build a valid Routes v2 body
+      // Accept either:
+      //   A) { stops: [{name,lat,lng}, ...] }  (preferred)
+      //   B) { ordered_stops: ["City A", "City B", ...] } (we'll geocode each name)
+      let routesBody: any;
+
+      if (Array.isArray(req.body?.stops) && req.body.stops.length >= 2) {
+        // Already have lat/lng
+        routesBody = toRoutesBodyFromStops(req.body.stops);
+      } else if (Array.isArray(req.body?.ordered_stops) && req.body.ordered_stops.length >= 2) {
+        // Geocode names → lat/lng (uses Geocoding API)
+        const stops = await geocodeStopsByName(req.body.ordered_stops, apiKey);
+        routesBody = toRoutesBodyFromStops(stops);
+      } else {
+        return res.status(400).json({
+          error: "Invalid request",
+          message:
+            'Send { "stops":[{ "name": "...", "lat": 0, "lng": 0 }, ...] } OR { "ordered_stops":["City A","City B", ...] } (min 2)',
+        });
       }
 
-      const data = await response.json();
-      res.json(data);
-    } catch (error) {
-      console.error("Routes API error:", error);
+      const fieldMask = [
+        "routes.duration",
+        "routes.distanceMeters",
+        "routes.legs.duration",
+        "routes.legs.distanceMeters",
+        "routes.polyline.encodedPolyline",
+      ].join(",");
+
+      // 3) Call Routes API v2
+      const response = await fetch("https://routes.googleapis.com/directions/v2:computeRoutes", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Goog-Api-Key": apiKey,
+          "X-Goog-FieldMask": fieldMask,
+        },
+        body: JSON.stringify(routesBody),
+      });
+
+      const text = await response.text();
+
+      // 4) If Google returns an error, LOG the exact body so you see why
+      if (!response.ok) {
+        console.error("ROUTES ERROR", response.status, text); // <- check Replit console
+        let code: string | undefined;
+        try { code = JSON.parse(text)?.error?.status; } catch {}
+        return res.status(400).json({
+          error: "Routes API request failed",
+          status: response.status,
+          code,
+          hint: "Ensure server key allows Routes API + Geocoding, and body uses latLng/placeId objects.",
+        });
+      }
+
+      // 5) Normalize output (optional but handy for frontend)
+      const data = JSON.parse(text);
+      const route = data.routes?.[0];
+      const legs = route?.legs ?? [];
+
+      const toHHMM = (sec?: number) => {
+        if (sec === undefined || sec === null) return undefined;
+        const h = Math.floor(sec / 3600);
+        const m = Math.round((sec % 3600) / 60);
+        return `${h ? h + " h " : ""}${m} m`;
+      };
+      const miles = (m?: number) => (m ? (m / 1609.344).toFixed(1) + " mi" : undefined);
+
+      return res.json({
+        polyline: route?.polyline?.encodedPolyline,
+        legs: legs.map((leg: any, i: number) => ({
+          index: i,
+          durationSeconds: leg.duration?.seconds,
+          durationText: toHHMM(leg.duration?.seconds),
+          distanceMeters: leg.distanceMeters,
+          distanceText: miles(leg.distanceMeters),
+        })),
+        totals: {
+          durationText: toHHMM(route?.duration?.seconds),
+          distanceText: miles(route?.distanceMeters),
+        },
+        // also return the resolved stops if you want to re-render markers
+        resolvedStops:
+          Array.isArray(req.body?.stops) && req.body.stops.length >= 2
+            ? req.body.stops
+            : undefined,
+        raw: data, // keep raw for future fields
+      });
+    } catch (err) {
+      console.error("Routes handler crash:", err);
       res.status(500).json({ error: "Failed to compute routes" });
     }
   });
+
 
   // Plan a new trip
   app.post("/api/trips/plan", async (req, res) => {
