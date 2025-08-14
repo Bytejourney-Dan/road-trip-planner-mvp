@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
-import { Map, List, Route as RouteIcon, ArrowLeft } from "lucide-react";
+import { Map, List, Route as RouteIcon, ArrowLeft, MapPin } from "lucide-react";
 import { MapView } from "@/components/map-view";
 import { ItineraryView } from "@/components/itinerary-view";
 import { Button } from "@/components/ui/button";
