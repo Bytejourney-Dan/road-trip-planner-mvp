@@ -173,98 +173,75 @@ export default function Results() {
                 </div>
               </div>
             </div>
-            
-            {/* Mobile Toggle Button */}
-            <div className="md:hidden">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setActiveView(activeView === "map" ? "itinerary" : "map")}
-                className="p-2 hover:bg-white/20 rounded-lg transition-all duration-200"
-                data-testid="button-mobile-toggle"
-              >
-                {activeView === "map" ? (
-                  <>
-                    <List className="h-4 w-4 mr-2" />
-                    <span className="text-sm">Itinerary</span>
-                  </>
-                ) : (
-                  <>
-                    <Map className="h-4 w-4 mr-2" />
-                    <span className="text-sm">Map</span>
-                  </>
-                )}
-              </Button>
-            </div>
+
           </div>
         </div>
         
 
       </header>
 
-      {/* Main Content - Desktop: Side by Side, Mobile: Toggle */}
+      {/* Main Content - Tab View */}
       <div className="flex-1 relative h-full z-10">
-        {/* Desktop Split View */}
-        <div className="hidden md:flex h-full">
-          {/* Map Section - 2/3 width */}
-          <div className="w-2/3 h-full relative">
+        {/* Tab Navigation */}
+        <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-20">
+          <div className="glass-strong rounded-xl p-1 flex">
+            <button
+              onClick={() => setActiveView('map')}
+              className={`px-6 py-3 rounded-lg text-sm font-medium transition-all duration-200 ${
+                activeView === 'map'
+                  ? 'bg-white/30 text-gray-900 shadow-md'
+                  : 'text-gray-700 hover:bg-white/20'
+              }`}
+              data-testid="button-view-map"
+            >
+              <MapPin className="h-4 w-4 inline mr-2" />
+              Route Map
+            </button>
+            <button
+              onClick={() => setActiveView('itinerary')}
+              className={`px-6 py-3 rounded-lg text-sm font-medium transition-all duration-200 ${
+                activeView === 'itinerary'
+                  ? 'bg-white/30 text-gray-900 shadow-md'
+                  : 'text-gray-700 hover:bg-white/20'
+              }`}
+              data-testid="button-view-itinerary"
+            >
+              <List className="h-4 w-4 inline mr-2" />
+              Trip Details
+            </button>
+          </div>
+        </div>
+
+        {/* Tab Content */}
+        <div className="h-full">
+          {activeView === 'map' ? (
             <MapView 
               key={`map-${completedTrip.id}-${Date.now()}`}
               itinerary={completedTrip.itinerary}
               isLoading={false}
               onItineraryUpdate={handleItineraryUpdate}
             />
-          </div>
-          
-          {/* Itinerary Section - 1/3 width */}
-          <div className="w-1/3 h-full bg-white/10 backdrop-blur-md border-l border-white/20">
-            <div className="h-full flex flex-col">
-              {/* Itinerary Header */}
-              <div className="px-6 py-4 border-b border-white/20 bg-white/5">
-                <h2 className="text-lg font-semibold text-gray-900 flex items-center">
-                  <List className="h-5 w-5 mr-2 text-blue-600" />
-                  Trip Itinerary
-                </h2>
-                <p className="text-sm text-gray-600 mt-1">
-                  {completedTrip.itinerary?.totalDays} days • {completedTrip.itinerary?.totalAttractions} attractions
-                </p>
-              </div>
-              
-              {/* Itinerary Content */}
-              <div className="flex-1 p-6 overflow-y-auto glass-scrollbar">
-                <ItineraryView 
-                  itinerary={completedTrip.itinerary}
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Mobile Toggle View */}
-        <div className="md:hidden h-full">
-          {activeView === "map" ? (
-            <div className="w-full h-full">
-              <MapView 
-                key={`map-${completedTrip.id}-${Date.now()}`}
-                itinerary={completedTrip.itinerary}
-                isLoading={false}
-                onItineraryUpdate={handleItineraryUpdate}
-              />
-            </div>
           ) : (
-            <div className="h-full p-4 overflow-y-auto glass-scrollbar">
-              <div className="mb-4">
-                <h2 className="text-lg font-semibold text-gray-900 flex items-center">
-                  <List className="h-5 w-5 mr-2" />
-                  Trip Itinerary
-                </h2>
-                <p className="text-sm text-gray-600 mt-1">
-                  {completedTrip.itinerary?.totalDays} days • {completedTrip.itinerary?.totalAttractions} attractions
-                </p>
+            <div className="h-full bg-white/10 backdrop-blur-md">
+              <div className="h-full flex flex-col">
+                {/* Itinerary Header */}
+                <div className="px-6 py-4 pt-20 border-b border-white/20 bg-white/5">
+                  <h2 className="text-xl font-semibold text-gray-900 flex items-center">
+                    <List className="h-6 w-6 mr-3 text-blue-600" />
+                    Trip Itinerary
+                  </h2>
+                  <p className="text-sm text-gray-600 mt-2">
+                    {completedTrip.itinerary?.totalDays} days • {completedTrip.itinerary?.totalAttractions} attractions • {completedTrip.itinerary?.totalDistance} miles
+                  </p>
+                </div>
+                
+                {/* Itinerary Content */}
+                <div className="flex-1 p-6 overflow-y-auto glass-scrollbar">
+                  <ItineraryView 
+                    itinerary={completedTrip.itinerary}
+                  />
+                </div>
               </div>
-              <ItineraryView 
-                itinerary={completedTrip.itinerary}
-              />
             </div>
           )}
         </div>
