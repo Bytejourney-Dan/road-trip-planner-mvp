@@ -593,7 +593,7 @@ export function MapView({ itinerary, isLoading, onItineraryUpdate }: MapViewProp
 
       {/* Trip Summary Panel - appears when trip is generated */}
       {itinerary && (
-        <div className="absolute top-4 left-4 z-50 animate-slide-up" data-testid="trip-summary">
+        <div className="absolute top-20 left-4 z-50 animate-slide-up" data-testid="trip-summary">
           <div className="glass-strong rounded-2xl p-4 max-w-xs">
             <div className="flex items-center space-x-2 mb-3">
               <CheckCircle className="h-5 w-5 text-emerald-500" />

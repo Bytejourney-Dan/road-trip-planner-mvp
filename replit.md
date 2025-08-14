@@ -26,6 +26,7 @@ Preferred communication style: Simple, everyday language.
 - ✅ **Interests Field Restoration**: Added back travel interests selection with Nature types multi-select functionality
 - ✅ **Dropdown Z-Index Fix**: Fixed location dropdown positioning to appear above all page elements
 - ✅ **Google Maps Red Pins**: Updated overnight stay markers to use authentic Google Maps red pins instead of custom blue circles
+- ✅ **Trip Summary Positioning**: Moved trip summary block down to avoid covering Google Maps map/satellite toggle controls
 
 **August 13, 2025**
 - ✅ **Comprehensive Location Editing**: Added interactive editing functionality with click-to-add attractions, removal capabilities, and real-time route updates
