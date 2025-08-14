@@ -797,7 +797,7 @@ export function MapView({ itinerary, isLoading, onItineraryUpdate, customAttract
                       const actualIndex = (selectedLocation.attractions || []).findIndex((attr, idx) => {
                         if (selectedLocation.dayNumber && removedAttractions && onRemoveAttraction) {
                           const removedIndexes = removedAttractions[selectedLocation.dayNumber] || [];
-                          const filteredAttractions = selectedLocation.attractions.filter((_, i) => !removedIndexes.includes(i));
+                          const filteredAttractions = (selectedLocation.attractions || []).filter((_, i) => !removedIndexes.includes(i));
                           return filteredAttractions[originalIndex] === attr;
                         }
                         return originalIndex === idx;
@@ -912,6 +912,44 @@ export function MapView({ itinerary, isLoading, onItineraryUpdate, customAttract
                         {selectedAttraction.description}
                       </p>
                     </div>
+
+                    {/* Remove Button for Selected Attraction */}
+                    {selectedLocation && selectedLocation.dayNumber && onRemoveAttraction && (
+                      <div className="mb-4">
+                        <button
+                          onClick={() => {
+                            // Find if this is a custom attraction
+                            const customDayAttractions = customAttractions?.[selectedLocation.dayNumber!] || [];
+                            const isCustomAttraction = customDayAttractions.some(custom => 
+                              custom.name === selectedAttraction.name && !custom.isRemoved
+                            );
+                            
+                            // Find the attraction index in the original day attractions
+                            const originalAttractions = itinerary?.days.find(d => d.dayNumber === selectedLocation.dayNumber)?.attractions || [];
+                            const originalIndex = originalAttractions.findIndex(attr => attr.name === selectedAttraction.name);
+                            
+                            if (isCustomAttraction) {
+                              const customIndex = customDayAttractions.findIndex(custom => 
+                                custom.name === selectedAttraction.name && !custom.isRemoved
+                              );
+                              onRemoveAttraction(selectedLocation.dayNumber!, customIndex, true);
+                            } else if (originalIndex >= 0) {
+                              onRemoveAttraction(selectedLocation.dayNumber!, originalIndex, false);
+                            }
+                            
+                            // Close the attraction details panel
+                            setSelectedAttraction(null);
+                            setAttractionDetails(null);
+                            setSelectedLocation(null);
+                          }}
+                          className="w-full px-4 py-2 bg-red-500 text-white rounded-lg font-medium hover:bg-red-600 transition-all duration-200 flex items-center justify-center space-x-2"
+                          data-testid="button-remove-selected-attraction"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                          <span>Remove from Trip</span>
+                        </button>
+                      </div>
+                    )}
 
                     {/* Address */}
                     {attractionDetails.formattedAddress && (
