@@ -1,13 +1,14 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
-import { Map, List, Route as RouteIcon, ArrowLeft, MapPin } from "lucide-react";
+import { Map, List, Calendar, Route as RouteIcon, ArrowLeft, MapPin } from "lucide-react";
 import { MapView } from "@/components/map-view";
 import { ItineraryView } from "@/components/itinerary-view";
+import CalendarView from "@/components/calendar-view";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Trip } from "@/types/trip";
 
-type ViewMode = "map" | "itinerary";
+type ViewMode = "map" | "itinerary" | "calendar";
 
 export default function Results() {
   const [, navigate] = useLocation();
@@ -229,6 +230,18 @@ export default function Results() {
               Route Map
             </button>
             <button
+              onClick={() => setActiveView('calendar')}
+              className={`px-6 py-3 rounded-lg text-sm font-medium transition-all duration-200 ${
+                activeView === 'calendar'
+                  ? 'bg-white/30 text-gray-900 shadow-md'
+                  : 'text-gray-700 hover:bg-white/20'
+              }`}
+              data-testid="button-view-calendar"
+            >
+              <Calendar className="h-4 w-4 inline mr-2" />
+              Calendar
+            </button>
+            <button
               onClick={() => setActiveView('itinerary')}
               className={`px-6 py-3 rounded-lg text-sm font-medium transition-all duration-200 ${
                 activeView === 'itinerary'
@@ -255,6 +268,31 @@ export default function Results() {
               removedAttractions={removedAttractions}
               onRemoveAttraction={handleRemoveAttraction}
             />
+          ) : activeView === 'calendar' ? (
+            <div className="h-full bg-white/10 backdrop-blur-md">
+              <div className="h-full flex flex-col">
+                {/* Calendar Header */}
+                <div className="px-6 py-4 pt-20 border-b border-white/20 bg-white/5">
+                  <h2 className="text-xl font-semibold text-gray-900 flex items-center">
+                    <Calendar className="h-6 w-6 mr-3 text-blue-600" />
+                    Trip Calendar
+                  </h2>
+                  <p className="text-sm text-gray-600 mt-2">
+                    {completedTrip.itinerary?.totalDays} days • {completedTrip.itinerary?.totalAttractions} attractions • {completedTrip.itinerary?.totalDistance} miles
+                  </p>
+                </div>
+                
+                {/* Calendar Content */}
+                <div className="flex-1 p-6 overflow-y-auto glass-scrollbar">
+                  <CalendarView 
+                    itinerary={completedTrip.itinerary}
+                    onRemoveAttraction={handleRemoveAttraction}
+                    customAttractions={customAttractions}
+                    removedAttractions={removedAttractions}
+                  />
+                </div>
+              </div>
+            </div>
           ) : (
             <div className="h-full bg-white/10 backdrop-blur-md">
               <div className="h-full flex flex-col">
