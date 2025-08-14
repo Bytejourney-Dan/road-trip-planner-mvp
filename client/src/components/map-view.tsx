@@ -302,23 +302,18 @@ export function MapView({ itinerary, isLoading, onItineraryUpdate, customAttract
     }
 
     itinerary.days.forEach((day, index) => {
-      // Get all attractions for this day (original + custom)
-      const allDayAttractions = [...day.attractions];
-      const customDayAttractions = customAttractions?.[day.dayNumber] || [];
+      // Get removed attraction indexes for this day
+      const removedIndexes = removedAttractions?.[day.dayNumber] || [];
       
-      // Add custom attractions and filter out removed ones
-      customDayAttractions.forEach((custom) => {
-        if (!custom.isRemoved) {
-          allDayAttractions.push(custom);
-        }
-      });
-
-      // Filter out any attractions marked as removed
-      const activeAttractions = allDayAttractions.filter((attraction) => {
-        return !customDayAttractions.some(custom => 
-          custom.isRemoved && custom.name === attraction.name
-        );
-      });
+      // Filter original attractions, excluding removed ones
+      const filteredOriginalAttractions = day.attractions.filter((_, index) => !removedIndexes.includes(index));
+      
+      // Get custom attractions for this day and filter out removed ones
+      const customDayAttractions = customAttractions?.[day.dayNumber] || [];
+      const activeCustomAttractions = customDayAttractions.filter(custom => !custom.isRemoved);
+      
+      // Combine filtered original and active custom attractions
+      const activeAttractions = [...filteredOriginalAttractions, ...activeCustomAttractions];
 
       // Don't add attractions to route coordinates - they are just markers, not waypoints
       // The route should only connect overnight stops as per user requirements
@@ -788,76 +783,87 @@ export function MapView({ itinerary, isLoading, onItineraryUpdate, customAttract
                   Nearby Attractions
                 </h4>
                 <div className="space-y-3">
-                  {selectedLocation.attractions.map((attraction, index) => (
-                    <div 
-                      key={index}
-                      className={`p-3 glass-light rounded-xl glass-hover cursor-pointer transition-all duration-200 ${
-                        selectedAttraction?.name === attraction.name ? 'ring-2 ring-blue-500 bg-blue-50/50' : ''
-                      }`}
-                      data-testid={`attraction-${index}`}
-                      onClick={() => {
-                        if (selectedAttraction?.name === attraction.name) {
-                          // Toggle off if same attraction clicked
-                          setSelectedAttraction(null);
-                          setAttractionDetails(null);
-                        } else {
-                          // Select new attraction and fetch details
-                          setSelectedAttraction(attraction);
-                          fetchAttractionDetails(attraction.name);
+                  {(selectedLocation.attractions || [])
+                    .filter((attraction, index) => {
+                      // Filter out removed attractions
+                      if (selectedLocation.dayNumber && removedAttractions && onRemoveAttraction) {
+                        const removedIndexes = removedAttractions[selectedLocation.dayNumber] || [];
+                        return !removedIndexes.includes(index);
+                      }
+                      return true;
+                    })
+                    .map((attraction, originalIndex) => {
+                      // Find the original index in the unfiltered array
+                      const actualIndex = (selectedLocation.attractions || []).findIndex((attr, idx) => {
+                        if (selectedLocation.dayNumber && removedAttractions && onRemoveAttraction) {
+                          const removedIndexes = removedAttractions[selectedLocation.dayNumber] || [];
+                          const filteredAttractions = selectedLocation.attractions.filter((_, i) => !removedIndexes.includes(i));
+                          return filteredAttractions[originalIndex] === attr;
                         }
-                      }}
-                    >
-                      <h5 className="font-semibold text-gray-900 mb-1" data-testid={`attraction-name-${index}`}>
-                        {attraction.name}
-                      </h5>
-                      <p className="text-sm text-gray-700" data-testid={`attraction-description-${index}`}>
-                        {attraction.description}
-                      </p>
-                      {selectedAttraction?.name === attraction.name && (
-                        <div className="mt-2 text-xs text-blue-600 font-medium">
-                          Click to view details →
+                        return originalIndex === idx;
+                      });
+                      
+                      return (
+                        <div 
+                          key={actualIndex}
+                          className={`p-3 glass-light rounded-xl transition-all duration-200 ${
+                            selectedAttraction?.name === attraction.name ? 'ring-2 ring-blue-500 bg-blue-50/50' : ''
+                          }`}
+                          data-testid={`attraction-${actualIndex}`}
+                        >
+                          <div className="flex items-start justify-between">
+                            <div 
+                              className="flex-1 cursor-pointer"
+                              onClick={() => {
+                                if (selectedAttraction?.name === attraction.name) {
+                                  // Toggle off if same attraction clicked
+                                  setSelectedAttraction(null);
+                                  setAttractionDetails(null);
+                                } else {
+                                  // Select new attraction and fetch details
+                                  setSelectedAttraction(attraction);
+                                  fetchAttractionDetails(attraction.name);
+                                }
+                              }}
+                            >
+                              <h5 className="font-semibold text-gray-900 mb-1" data-testid={`attraction-name-${actualIndex}`}>
+                                {attraction.name}
+                              </h5>
+                              <p className="text-sm text-gray-700" data-testid={`attraction-description-${actualIndex}`}>
+                                {attraction.description}
+                              </p>
+                              {selectedAttraction?.name === attraction.name && (
+                                <div className="mt-2 text-xs text-blue-600 font-medium">
+                                  Click to view details →
+                                </div>
+                              )}
+                            </div>
+                            {/* Remove button for each attraction */}
+                            {selectedLocation.dayNumber && onRemoveAttraction && (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  // Find the real index in the original attractions array
+                                  const originalAttractions = selectedLocation.attractions || [];
+                                  const realIndex = originalAttractions.findIndex(attr => attr.name === attraction.name);
+                                  onRemoveAttraction(selectedLocation.dayNumber!, realIndex, false);
+                                }}
+                                className="ml-2 p-1.5 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-all duration-200 flex-shrink-0"
+                                data-testid={`button-remove-attraction-${actualIndex}`}
+                                title="Remove attraction"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </button>
+                            )}
+                          </div>
                         </div>
-                      )}
-                    </div>
-                  ))}
+                      );
+                    })}
                 </div>
               </div>
             )}
 
-            {/* Remove Attraction Button */}
-            {selectedLocation.type === 'attraction' && selectedLocation.dayNumber && onRemoveAttraction && (
-              <div className="mb-4">
-                <button
-                  onClick={() => {
-                    // Find if this is a custom attraction
-                    const customDayAttractions = customAttractions?.[selectedLocation.dayNumber!] || [];
-                    const isCustomAttraction = customDayAttractions.some(custom => 
-                      custom.name === selectedLocation.name && !custom.isRemoved
-                    );
-                    
-                    // Find the attraction index in the original day attractions
-                    const originalAttractions = itinerary?.days.find(d => d.dayNumber === selectedLocation.dayNumber)?.attractions || [];
-                    const originalIndex = originalAttractions.findIndex(attr => attr.name === selectedLocation.name);
-                    
-                    if (isCustomAttraction) {
-                      const customIndex = customDayAttractions.findIndex(custom => 
-                        custom.name === selectedLocation.name && !custom.isRemoved
-                      );
-                      onRemoveAttraction(selectedLocation.dayNumber!, customIndex, true);
-                    } else if (originalIndex >= 0) {
-                      onRemoveAttraction(selectedLocation.dayNumber!, originalIndex, false);
-                    }
-                    
-                    setSelectedLocation(null);
-                  }}
-                  className="w-full px-4 py-2 bg-red-500 text-white rounded-lg font-medium hover:bg-red-600 transition-all duration-200 flex items-center justify-center space-x-2"
-                  data-testid="button-delete-attraction"
-                >
-                  <Trash2 className="h-4 w-4" />
-                  <span>Remove Attraction</span>
-                </button>
-              </div>
-            )}
+
 
 
 
