@@ -13,8 +13,8 @@ export default function Results() {
   const [, navigate] = useLocation();
   const [activeView, setActiveView] = useState<ViewMode>("map");
   const [completedTrip, setCompletedTrip] = useState<Trip | undefined>();
-  const [customAttractions, setCustomAttractions] = useState<Map<number, any[]>>(new Map());
-  const [removedAttractions, setRemovedAttractions] = useState<Map<number, number[]>>(new Map());
+  const [customAttractions, setCustomAttractions] = useState<Record<number, any[]>>({});
+  const [removedAttractions, setRemovedAttractions] = useState<Record<number, number[]>>({});
   const { toast } = useToast();
 
   useEffect(() => {
@@ -60,21 +60,23 @@ export default function Results() {
   const handleRemoveAttraction = (dayNumber: number, attractionIndex: number, isCustom: boolean) => {
     if (isCustom) {
       // Remove custom attraction
-      const currentCustomAttractions = customAttractions.get(dayNumber) || [];
+      const currentCustomAttractions = customAttractions[dayNumber] || [];
       const updatedCustomAttractions = currentCustomAttractions.map((attraction: any, index: number) => 
         index === attractionIndex ? { ...attraction, isRemoved: true } : attraction
       );
       
-      const newCustomAttractions = new Map<number, any[]>(customAttractions);
-      newCustomAttractions.set(dayNumber, updatedCustomAttractions);
-      setCustomAttractions(newCustomAttractions);
+      setCustomAttractions({
+        ...customAttractions,
+        [dayNumber]: updatedCustomAttractions
+      });
     } else {
       // Mark original attraction as removed
-      const currentRemoved = removedAttractions.get(dayNumber) || [];
+      const currentRemoved = removedAttractions[dayNumber] || [];
       if (!currentRemoved.includes(attractionIndex)) {
-        const newRemovedAttractions = new Map<number, number[]>(removedAttractions);
-        newRemovedAttractions.set(dayNumber, [...currentRemoved, attractionIndex]);
-        setRemovedAttractions(newRemovedAttractions);
+        setRemovedAttractions({
+          ...removedAttractions,
+          [dayNumber]: [...currentRemoved, attractionIndex]
+        });
       }
     }
 

@@ -13,8 +13,8 @@ interface MapViewProps {
   itinerary?: TripItinerary;
   isLoading: boolean;
   onItineraryUpdate?: (updatedItinerary: TripItinerary) => void;
-  customAttractions?: Map<number, any[]>;
-  removedAttractions?: Map<number, number[]>;
+  customAttractions?: Record<number, any[]>;
+  removedAttractions?: Record<number, number[]>;
   onRemoveAttraction?: (dayNumber: number, attractionIndex: number, isCustom: boolean) => void;
 }
 
@@ -304,7 +304,7 @@ export function MapView({ itinerary, isLoading, onItineraryUpdate, customAttract
     itinerary.days.forEach((day, index) => {
       // Get all attractions for this day (original + custom)
       const allDayAttractions = [...day.attractions];
-      const customDayAttractions = customAttractions.get(day.dayNumber) || [];
+      const customDayAttractions = customAttractions?.[day.dayNumber] || [];
       
       // Add custom attractions and filter out removed ones
       customDayAttractions.forEach((custom) => {
@@ -830,7 +830,7 @@ export function MapView({ itinerary, isLoading, onItineraryUpdate, customAttract
                 <button
                   onClick={() => {
                     // Find if this is a custom attraction
-                    const customDayAttractions = customAttractions?.get(selectedLocation.dayNumber!) || [];
+                    const customDayAttractions = customAttractions?.[selectedLocation.dayNumber!] || [];
                     const isCustomAttraction = customDayAttractions.some(custom => 
                       custom.name === selectedLocation.name && !custom.isRemoved
                     );

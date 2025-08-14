@@ -5,8 +5,8 @@ import { TripItinerary } from "@/types/trip";
 interface ItineraryViewProps {
   itinerary?: TripItinerary;
   onRemoveAttraction?: (dayNumber: number, attractionIndex: number, isCustom: boolean) => void;
-  customAttractions?: Map<number, any[]>;
-  removedAttractions?: Map<number, number[]>;
+  customAttractions?: Record<number, any[]>;
+  removedAttractions?: Record<number, number[]>;
 }
 
 export function ItineraryView({ itinerary, onRemoveAttraction, customAttractions, removedAttractions }: ItineraryViewProps) {
@@ -84,12 +84,12 @@ export function ItineraryView({ itinerary, onRemoveAttraction, customAttractions
                         {day.attractions
                           .filter((_, index) => {
                             // Filter out removed attractions by checking the removedAttractions map
-                            const removedIndexes = onRemoveAttraction ? (removedAttractions?.get(day.dayNumber) || []) : [];
+                            const removedIndexes = onRemoveAttraction ? (removedAttractions?.[day.dayNumber] || []) : [];
                             return !removedIndexes.includes(index);
                           })
                           .map((attraction, attractionIndex) => {
                           // Check if this is a custom attraction
-                          const customDayAttractions = customAttractions?.get(day.dayNumber) || [];
+                          const customDayAttractions = customAttractions?.[day.dayNumber] || [];
                           const isCustomAttraction = customDayAttractions.some(custom => 
                             custom.name === attraction.name && !custom.isRemoved
                           );
@@ -128,7 +128,7 @@ export function ItineraryView({ itinerary, onRemoveAttraction, customAttractions
                         })}
                         
                         {/* Display custom attractions */}
-                        {customAttractions?.get(day.dayNumber)?.filter(custom => !custom.isRemoved).map((customAttraction, customIndex) => (
+                        {customAttractions?.[day.dayNumber]?.filter(custom => !custom.isRemoved).map((customAttraction, customIndex) => (
                           <div 
                             key={`custom-${customIndex}`}
                             className="flex items-center justify-between p-3 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors duration-200"
