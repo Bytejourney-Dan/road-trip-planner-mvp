@@ -77,10 +77,12 @@ export function MapView({ itinerary, isLoading, onItineraryUpdate }: MapViewProp
         ]
       });
 
-      // Add click listener for adding new attractions in edit mode
+      // Add click listener for adding new attractions in edit mode or showing location details
       googleMapRef.current.addListener('click', (e: any) => {
         if (isEditMode) {
           handleMapClick(e.latLng);
+        } else {
+          handleMapClickForLocationDetails(e.latLng);
         }
       });
     };
@@ -181,6 +183,56 @@ export function MapView({ itinerary, isLoading, onItineraryUpdate }: MapViewProp
     }
   };
 
+  // Handle map click to show location details with add to itinerary option
+  const handleMapClickForLocationDetails = async (latLng: any) => {
+    if (!itinerary) return;
+
+    try {
+      // Get place details from coordinates using reverse geocoding
+      const response = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${latLng.lat()},${latLng.lng()}&key=${await fetch('/api/config/maps-key').then(r => r.json()).then(d => d.apiKey)}`);
+      const data = await response.json();
+      
+      let placeName = "Custom Location";
+      if (data.results && data.results.length > 0) {
+        placeName = data.results[0].formatted_address || data.results[0].name || "Custom Location";
+      }
+
+      setSelectedLocation({
+        type: 'map-click',
+        name: placeName,
+        coordinates: {
+          lat: latLng.lat(),
+          lng: latLng.lng()
+        }
+      });
+
+    } catch (error) {
+      console.error("Error getting location details:", error);
+    }
+  };
+
+  // Handle adding a location to a specific day
+  const handleAddToItinerary = (dayNumber: number, location: any) => {
+    if (!location.coordinates) return;
+
+    const newAttraction = {
+      name: location.name,
+      description: "Added from map",
+      coordinates: {
+        lat: location.coordinates.lat,
+        lng: location.coordinates.lng
+      },
+      isCustom: true
+    };
+
+    // Add to custom attractions for the selected day
+    const dayAttractions = customAttractions.get(dayNumber) || [];
+    dayAttractions.push(newAttraction);
+    setCustomAttractions(new Map(customAttractions.set(dayNumber, dayAttractions)));
+    setPendingChanges(true);
+    setSelectedLocation(null);
+  };
+
   // Remove attraction
   const removeAttraction = (dayNumber: number, attractionIndex: number, isCustom: boolean) => {
     if (isCustom) {
@@ -265,17 +317,8 @@ export function MapView({ itinerary, isLoading, onItineraryUpdate }: MapViewProp
         );
       });
 
-      // Add attractions as waypoints before the overnight location
-      if (activeAttractions.length > 0) {
-        activeAttractions.forEach((attraction) => {
-          if (attraction.coordinates) {
-            routeCoordinates.push(new window.google.maps.LatLng(
-              attraction.coordinates.lat,
-              attraction.coordinates.lng
-            ));
-          }
-        });
-      }
+      // Don't add attractions to route coordinates - they are just markers, not waypoints
+      // The route should only connect overnight stops as per user requirements
 
       // Add markers for overnight locations
       if (day.overnightCoordinates) {
@@ -287,8 +330,8 @@ export function MapView({ itinerary, isLoading, onItineraryUpdate }: MapViewProp
             url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
               <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40" fill="none">
                 <circle cx="20" cy="20" r="18" fill="#3b82f6" stroke="#fff" stroke-width="3"/>
-                <text x="20" y="26" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12" font-weight="bold">
-                  Day ${day.dayNumber}
+                <text x="20" y="26" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14" font-weight="bold">
+                  ${day.dayNumber}
                 </text>
               </svg>
             `),
@@ -313,7 +356,7 @@ export function MapView({ itinerary, isLoading, onItineraryUpdate }: MapViewProp
         markersRef.current.push(marker);
         bounds.extend(marker.getPosition()!);
         
-        // Add overnight location to route coordinates after attractions
+        // Add overnight location to route coordinates (only overnight stops in route)
         routeCoordinates.push(new window.google.maps.LatLng(day.overnightCoordinates.lat, day.overnightCoordinates.lng));
       }
 
@@ -442,43 +485,15 @@ export function MapView({ itinerary, isLoading, onItineraryUpdate }: MapViewProp
 
     // Use Routes API for accurate driving routes
     if (routeCoordinates.length > 1) {
-      // Create waypoints for Routes API
-      const waypoints = routeCoordinates.slice(1, -1).map(coord => ({
-        location: {
-          latLng: {
-            latitude: coord.lat(),
-            longitude: coord.lng()
-          }
-        },
-        via: false
+      // Convert route coordinates to stops format for the backend
+      const stops = routeCoordinates.map((coord, index) => ({
+        name: `Stop ${index + 1}`,
+        lat: coord.lat(),
+        lng: coord.lng()
       }));
 
       const routeRequest = {
-        origin: {
-          location: {
-            latLng: {
-              latitude: routeCoordinates[0].lat(),
-              longitude: routeCoordinates[0].lng()
-            }
-          }
-        },
-        destination: {
-          location: {
-            latLng: {
-              latitude: routeCoordinates[routeCoordinates.length - 1].lat(),
-              longitude: routeCoordinates[routeCoordinates.length - 1].lng()
-            }
-          }
-        },
-        intermediates: waypoints,
-        travelMode: 'DRIVE',
-        routingPreference: 'TRAFFIC_UNAWARE',
-        computeAlternativeRoutes: false,
-        routeModifiers: {
-          avoidTolls: false,
-          avoidHighways: false,
-          avoidFerries: false
-        }
+        stops: stops
       };
 
       // Call Routes API through our backend
@@ -489,22 +504,19 @@ export function MapView({ itinerary, isLoading, onItineraryUpdate }: MapViewProp
       })
       .then(response => response.json())
       .then(data => {
-        if (data.routes && data.routes.length > 0) {
+        if (data.polyline) {
           // Decode the polyline and display it
-          const route = data.routes[0];
-          if (route.polyline && route.polyline.encodedPolyline) {
-            const decodedPath = window.google.maps.geometry.encoding.decodePath(route.polyline.encodedPolyline);
-            
-            const polyline = new window.google.maps.Polyline({
-              path: decodedPath,
-              geodesic: true,
-              strokeColor: '#4285F4',
-              strokeOpacity: 0.8,
-              strokeWeight: 4,
-              map: googleMapRef.current,
-            });
-            polylinesRef.current.push(polyline);
-          }
+          const decodedPath = window.google.maps.geometry.encoding.decodePath(data.polyline);
+          
+          const polyline = new window.google.maps.Polyline({
+            path: decodedPath,
+            geodesic: true,
+            strokeColor: '#4285F4',
+            strokeOpacity: 0.8,
+            strokeWeight: 4,
+            map: googleMapRef.current,
+          });
+          polylinesRef.current.push(polyline);
         }
       })
       .catch(error => {
@@ -824,6 +836,26 @@ export function MapView({ itinerary, isLoading, onItineraryUpdate }: MapViewProp
                   <Trash2 className="h-4 w-4" />
                   <span>Remove Attraction</span>
                 </button>
+              </div>
+            )}
+
+            {/* Add to Itinerary option for map-clicked locations */}
+            {selectedLocation.type === 'map-click' && (
+              <div className="mt-4 p-3 glass-light rounded-xl">
+                <h4 className="text-sm font-semibold text-gray-900 mb-3">Add to Itinerary</h4>
+                <p className="text-sm text-gray-600 mb-3">Choose which day to add this location to:</p>
+                <div className="space-y-2">
+                  {itinerary?.days.map((day) => (
+                    <button
+                      key={day.dayNumber}
+                      onClick={() => handleAddToItinerary(day.dayNumber, selectedLocation)}
+                      className="w-full p-2 text-left bg-white/50 hover:bg-white/70 rounded-lg transition-all duration-200 text-sm"
+                      data-testid={`button-add-to-day-${day.dayNumber}`}
+                    >
+                      Day {day.dayNumber}: {day.overnightLocation}
+                    </button>
+                  ))}
+                </div>
               </div>
             )}
 
