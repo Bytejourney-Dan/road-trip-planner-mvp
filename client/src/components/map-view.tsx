@@ -55,6 +55,36 @@ export function MapView({ itinerary, isLoading, onItineraryUpdate }: MapViewProp
   const [isEditMode, setIsEditMode] = useState(false);
   const [customAttractions, setCustomAttractions] = useState<Map<number, any[]>>(new Map());
   const [pendingChanges, setPendingChanges] = useState(false);
+  const [selectedAttraction, setSelectedAttraction] = useState<any | null>(null);
+  const [attractionDetails, setAttractionDetails] = useState<any | null>(null);
+  const [loadingAttractionDetails, setLoadingAttractionDetails] = useState(false);
+
+  // Function to fetch attraction details from Places API
+  const fetchAttractionDetails = async (attractionName: string) => {
+    setLoadingAttractionDetails(true);
+    try {
+      const response = await fetch('/api/places/search', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ query: attractionName }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setAttractionDetails(data);
+      } else {
+        console.error('Failed to fetch attraction details');
+        setAttractionDetails(null);
+      }
+    } catch (error) {
+      console.error('Error fetching attraction details:', error);
+      setAttractionDetails(null);
+    } finally {
+      setLoadingAttractionDetails(false);
+    }
+  };
 
   useEffect(() => {
     if (!mapRef.current) return;
@@ -789,13 +819,144 @@ export function MapView({ itinerary, isLoading, onItineraryUpdate }: MapViewProp
                 </h4>
                 <div className="space-y-3">
                   {selectedLocation.attractions.map((attraction, index) => (
-                    <div key={index} className="p-3 glass-light rounded-xl glass-hover cursor-pointer" data-testid={`attraction-${index}`}>
-                      <h5 className="font-semibold text-gray-900 mb-1" data-testid={`attraction-name-${index}`}>
-                        {attraction.name}
-                      </h5>
-                      <p className="text-sm text-gray-700" data-testid={`attraction-description-${index}`}>
-                        {attraction.description}
-                      </p>
+                    <div key={index} className="space-y-3">
+                      <div 
+                        className="p-3 glass-light rounded-xl glass-hover cursor-pointer" 
+                        data-testid={`attraction-${index}`}
+                        onClick={() => {
+                          if (selectedAttraction?.name === attraction.name) {
+                            // Toggle off if same attraction clicked
+                            setSelectedAttraction(null);
+                            setAttractionDetails(null);
+                          } else {
+                            // Select new attraction and fetch details
+                            setSelectedAttraction(attraction);
+                            fetchAttractionDetails(attraction.name);
+                          }
+                        }}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex-1">
+                            <h5 className="font-semibold text-gray-900 mb-1 flex items-center" data-testid={`attraction-name-${index}`}>
+                              {attraction.name}
+                              <span className="ml-2 text-blue-500 text-sm">
+                                {selectedAttraction?.name === attraction.name ? '▼' : '▶'}
+                              </span>
+                            </h5>
+                            <p className="text-sm text-gray-700" data-testid={`attraction-description-${index}`}>
+                              {attraction.description}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Attraction Details Panel */}
+                      {selectedAttraction?.name === attraction.name && (
+                        <div className="ml-4 p-4 bg-white/20 backdrop-blur-sm rounded-xl border-l-4 border-blue-500" data-testid={`attraction-details-${index}`}>
+                          {loadingAttractionDetails ? (
+                            <div className="flex items-center justify-center py-4">
+                              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
+                              <span className="ml-2 text-sm text-gray-600">Loading details...</span>
+                            </div>
+                          ) : attractionDetails ? (
+                            <div className="space-y-3">
+                              <h6 className="font-semibold text-gray-900 flex items-center">
+                                <span className="text-blue-500 mr-2">ℹ️</span>
+                                Detailed Information
+                              </h6>
+                              
+                              {/* Address */}
+                              {attractionDetails.formattedAddress && (
+                                <div className="text-sm">
+                                  <span className="text-gray-600 font-medium">Address:</span>
+                                  <p className="text-gray-800 mt-1" data-testid="attraction-address">
+                                    {attractionDetails.formattedAddress}
+                                  </p>
+                                </div>
+                              )}
+
+                              {/* Rating */}
+                              {attractionDetails.rating && (
+                                <div className="text-sm">
+                                  <span className="text-gray-600 font-medium">Rating:</span>
+                                  <div className="flex items-center mt-1">
+                                    <span className="text-yellow-500 mr-1">⭐</span>
+                                    <span className="font-semibold text-gray-900" data-testid="attraction-rating">
+                                      {attractionDetails.rating.toFixed(1)}
+                                    </span>
+                                    {attractionDetails.userRatingsTotal && (
+                                      <span className="text-gray-600 ml-2" data-testid="attraction-reviews">
+                                        ({attractionDetails.userRatingsTotal} reviews)
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* Opening Hours */}
+                              {attractionDetails.openingHours && (
+                                <div className="text-sm">
+                                  <span className="text-gray-600 font-medium">Hours:</span>
+                                  <p className="text-gray-800 mt-1" data-testid="attraction-hours">
+                                    {attractionDetails.openingHours.openNow ? 'Open now' : 'Closed'} 
+                                    {attractionDetails.openingHours.weekdayText && attractionDetails.openingHours.weekdayText[0] && 
+                                      ` • ${attractionDetails.openingHours.weekdayText[0].split(': ')[1]}`
+                                    }
+                                  </p>
+                                </div>
+                              )}
+
+                              {/* Phone */}
+                              {attractionDetails.formattedPhoneNumber && (
+                                <div className="text-sm">
+                                  <span className="text-gray-600 font-medium">Phone:</span>
+                                  <p className="text-gray-800 mt-1" data-testid="attraction-phone">
+                                    {attractionDetails.formattedPhoneNumber}
+                                  </p>
+                                </div>
+                              )}
+
+                              {/* Website */}
+                              {attractionDetails.website && (
+                                <div className="text-sm">
+                                  <span className="text-gray-600 font-medium">Website:</span>
+                                  <a
+                                    href={attractionDetails.website}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="block text-blue-600 hover:text-blue-800 underline mt-1"
+                                    data-testid="attraction-website"
+                                  >
+                                    Visit website
+                                  </a>
+                                </div>
+                              )}
+
+                              {/* Photos */}
+                              {attractionDetails.photos && attractionDetails.photos.length > 0 && (
+                                <div className="text-sm">
+                                  <span className="text-gray-600 font-medium mb-2 block">Photos:</span>
+                                  <div className="grid grid-cols-2 gap-2">
+                                    {attractionDetails.photos.slice(0, 2).map((photo: string, photoIndex: number) => (
+                                      <img
+                                        key={photoIndex}
+                                        src={photo}
+                                        alt={`${attraction.name} photo ${photoIndex + 1}`}
+                                        className="w-full h-16 object-cover rounded-lg"
+                                        data-testid={`attraction-photo-${photoIndex}`}
+                                      />
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          ) : (
+                            <div className="text-sm text-gray-600 text-center py-2">
+                              Unable to load detailed information for this attraction.
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>

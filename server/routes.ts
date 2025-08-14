@@ -255,6 +255,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Search for place details using Places API
+  app.post("/api/places/search", async (req, res) => {
+    try {
+      const { query } = req.body;
+      
+      if (!query || typeof query !== 'string') {
+        return res.status(400).json({ 
+          error: "Invalid request",
+          message: "Query parameter is required"
+        });
+      }
+
+      const { getPlaceDetails } = await import("./services/maps.js");
+      const placeDetails = await getPlaceDetails(query);
+      
+      if (!placeDetails) {
+        return res.status(404).json({ 
+          error: "Place not found",
+          message: `No details found for: ${query}`
+        });
+      }
+
+      res.json({
+        name: placeDetails.name,
+        formattedAddress: placeDetails.formattedAddress,
+        rating: placeDetails.rating,
+        userRatingsTotal: placeDetails.userRatingsTotal,
+        photos: placeDetails.photos,
+        website: placeDetails.website,
+        formattedPhoneNumber: placeDetails.phoneNumber,
+        openingHours: null // Not included in current getPlaceDetails implementation
+      });
+    } catch (error) {
+      console.error("Error searching place details:", error);
+      res.status(500).json({ 
+        error: "Failed to search place details",
+        message: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
+
   // Get a specific trip
   app.get("/api/trips/:id", async (req, res) => {
     try {
