@@ -651,8 +651,10 @@ export function MapView({ itinerary, isLoading, onItineraryUpdate }: MapViewProp
 
       {/* Floating Location Info Panel */}
       {selectedLocation && (
-        <div className="absolute top-4 right-4 w-80 max-h-[calc(100%-2rem)] z-50 animate-slide-up" data-testid="location-info-panel">
-          <div className="glass-strong rounded-2xl p-6 glass-scrollbar overflow-y-auto">
+        <div className="absolute top-4 right-4 z-50 animate-slide-up" data-testid="location-info-panel">
+          <div className="flex space-x-4">
+            {/* Main Location Info Panel */}
+            <div className="w-80 max-h-[calc(100vh-2rem)] glass-strong rounded-2xl p-6 glass-scrollbar overflow-y-auto">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-gray-900" data-testid="text-location-title">
                 {selectedLocation.type === 'start' && '🚀 Trip Start'}
@@ -819,142 +821,33 @@ export function MapView({ itinerary, isLoading, onItineraryUpdate }: MapViewProp
                 </h4>
                 <div className="space-y-3">
                   {selectedLocation.attractions.map((attraction, index) => (
-                    <div key={index} className="space-y-3">
-                      <div 
-                        className="p-3 glass-light rounded-xl glass-hover cursor-pointer" 
-                        data-testid={`attraction-${index}`}
-                        onClick={() => {
-                          if (selectedAttraction?.name === attraction.name) {
-                            // Toggle off if same attraction clicked
-                            setSelectedAttraction(null);
-                            setAttractionDetails(null);
-                          } else {
-                            // Select new attraction and fetch details
-                            setSelectedAttraction(attraction);
-                            fetchAttractionDetails(attraction.name);
-                          }
-                        }}
-                      >
-                        <div className="flex items-center justify-between">
-                          <div className="flex-1">
-                            <h5 className="font-semibold text-gray-900 mb-1 flex items-center" data-testid={`attraction-name-${index}`}>
-                              {attraction.name}
-                              <span className="ml-2 text-blue-500 text-sm">
-                                {selectedAttraction?.name === attraction.name ? '▼' : '▶'}
-                              </span>
-                            </h5>
-                            <p className="text-sm text-gray-700" data-testid={`attraction-description-${index}`}>
-                              {attraction.description}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Attraction Details Panel */}
+                    <div 
+                      key={index}
+                      className={`p-3 glass-light rounded-xl glass-hover cursor-pointer transition-all duration-200 ${
+                        selectedAttraction?.name === attraction.name ? 'ring-2 ring-blue-500 bg-blue-50/50' : ''
+                      }`}
+                      data-testid={`attraction-${index}`}
+                      onClick={() => {
+                        if (selectedAttraction?.name === attraction.name) {
+                          // Toggle off if same attraction clicked
+                          setSelectedAttraction(null);
+                          setAttractionDetails(null);
+                        } else {
+                          // Select new attraction and fetch details
+                          setSelectedAttraction(attraction);
+                          fetchAttractionDetails(attraction.name);
+                        }
+                      }}
+                    >
+                      <h5 className="font-semibold text-gray-900 mb-1" data-testid={`attraction-name-${index}`}>
+                        {attraction.name}
+                      </h5>
+                      <p className="text-sm text-gray-700" data-testid={`attraction-description-${index}`}>
+                        {attraction.description}
+                      </p>
                       {selectedAttraction?.name === attraction.name && (
-                        <div className="ml-4 p-4 bg-white/20 backdrop-blur-sm rounded-xl border-l-4 border-blue-500" data-testid={`attraction-details-${index}`}>
-                          {loadingAttractionDetails ? (
-                            <div className="flex items-center justify-center py-4">
-                              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
-                              <span className="ml-2 text-sm text-gray-600">Loading details...</span>
-                            </div>
-                          ) : attractionDetails ? (
-                            <div className="space-y-3">
-                              <h6 className="font-semibold text-gray-900 flex items-center">
-                                <span className="text-blue-500 mr-2">ℹ️</span>
-                                Detailed Information
-                              </h6>
-                              
-                              {/* Address */}
-                              {attractionDetails.formattedAddress && (
-                                <div className="text-sm">
-                                  <span className="text-gray-600 font-medium">Address:</span>
-                                  <p className="text-gray-800 mt-1" data-testid="attraction-address">
-                                    {attractionDetails.formattedAddress}
-                                  </p>
-                                </div>
-                              )}
-
-                              {/* Rating */}
-                              {attractionDetails.rating && (
-                                <div className="text-sm">
-                                  <span className="text-gray-600 font-medium">Rating:</span>
-                                  <div className="flex items-center mt-1">
-                                    <span className="text-yellow-500 mr-1">⭐</span>
-                                    <span className="font-semibold text-gray-900" data-testid="attraction-rating">
-                                      {attractionDetails.rating.toFixed(1)}
-                                    </span>
-                                    {attractionDetails.userRatingsTotal && (
-                                      <span className="text-gray-600 ml-2" data-testid="attraction-reviews">
-                                        ({attractionDetails.userRatingsTotal} reviews)
-                                      </span>
-                                    )}
-                                  </div>
-                                </div>
-                              )}
-
-                              {/* Opening Hours */}
-                              {attractionDetails.openingHours && (
-                                <div className="text-sm">
-                                  <span className="text-gray-600 font-medium">Hours:</span>
-                                  <p className="text-gray-800 mt-1" data-testid="attraction-hours">
-                                    {attractionDetails.openingHours.openNow ? 'Open now' : 'Closed'} 
-                                    {attractionDetails.openingHours.weekdayText && attractionDetails.openingHours.weekdayText[0] && 
-                                      ` • ${attractionDetails.openingHours.weekdayText[0].split(': ')[1]}`
-                                    }
-                                  </p>
-                                </div>
-                              )}
-
-                              {/* Phone */}
-                              {attractionDetails.formattedPhoneNumber && (
-                                <div className="text-sm">
-                                  <span className="text-gray-600 font-medium">Phone:</span>
-                                  <p className="text-gray-800 mt-1" data-testid="attraction-phone">
-                                    {attractionDetails.formattedPhoneNumber}
-                                  </p>
-                                </div>
-                              )}
-
-                              {/* Website */}
-                              {attractionDetails.website && (
-                                <div className="text-sm">
-                                  <span className="text-gray-600 font-medium">Website:</span>
-                                  <a
-                                    href={attractionDetails.website}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="block text-blue-600 hover:text-blue-800 underline mt-1"
-                                    data-testid="attraction-website"
-                                  >
-                                    Visit website
-                                  </a>
-                                </div>
-                              )}
-
-                              {/* Photos */}
-                              {attractionDetails.photos && attractionDetails.photos.length > 0 && (
-                                <div className="text-sm">
-                                  <span className="text-gray-600 font-medium mb-2 block">Photos:</span>
-                                  <div className="grid grid-cols-2 gap-2">
-                                    {attractionDetails.photos.slice(0, 2).map((photo: string, photoIndex: number) => (
-                                      <img
-                                        key={photoIndex}
-                                        src={photo}
-                                        alt={`${attraction.name} photo ${photoIndex + 1}`}
-                                        className="w-full h-16 object-cover rounded-lg"
-                                        data-testid={`attraction-photo-${photoIndex}`}
-                                      />
-                                    ))}
-                                  </div>
-                                </div>
-                              )}
-                            </div>
-                          ) : (
-                            <div className="text-sm text-gray-600 text-center py-2">
-                              Unable to load detailed information for this attraction.
-                            </div>
-                          )}
+                        <div className="mt-2 text-xs text-blue-600 font-medium">
+                          Click to view details →
                         </div>
                       )}
                     </div>
@@ -1023,6 +916,136 @@ export function MapView({ itinerary, isLoading, onItineraryUpdate }: MapViewProp
               <div className="mt-4 p-3 glass-light rounded-xl flex items-center">
                 <Bed className="h-4 w-4 text-blue-500 mr-2" />
                 <span className="text-sm font-medium text-gray-800" data-testid="text-overnight-indicator">Overnight stay location</span>
+              </div>
+            )}
+            </div>
+
+            {/* Attraction Details Panel - Right Side */}
+            {selectedAttraction && (
+              <div className="w-80 max-h-[calc(100vh-2rem)] glass-strong rounded-2xl p-6 glass-scrollbar overflow-y-auto" data-testid="attraction-details-panel">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+                    <span className="text-blue-500 mr-2">ℹ️</span>
+                    Attraction Details
+                  </h3>
+                  <button
+                    onClick={() => {
+                      setSelectedAttraction(null);
+                      setAttractionDetails(null);
+                    }}
+                    className="p-2 hover:bg-white/20 rounded-lg transition-all duration-200 glass-hover"
+                    data-testid="button-close-attraction-details"
+                  >
+                    <X className="h-4 w-4 text-gray-600" />
+                  </button>
+                </div>
+
+                {loadingAttractionDetails ? (
+                  <div className="flex items-center justify-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+                    <span className="ml-3 text-gray-600">Loading details...</span>
+                  </div>
+                ) : attractionDetails ? (
+                  <div className="space-y-4">
+                    {/* Attraction Name */}
+                    <div>
+                      <h4 className="text-xl font-bold text-gray-900 mb-2" data-testid="attraction-details-name">
+                        {selectedAttraction.name}
+                      </h4>
+                      <p className="text-sm text-gray-700" data-testid="attraction-details-description">
+                        {selectedAttraction.description}
+                      </p>
+                    </div>
+
+                    {/* Address */}
+                    {attractionDetails.formattedAddress && (
+                      <div className="p-3 glass-light rounded-xl">
+                        <div className="flex items-center mb-1">
+                          <MapPin className="h-4 w-4 text-gray-500 mr-2" />
+                          <span className="text-sm font-medium text-gray-600">Address</span>
+                        </div>
+                        <p className="text-sm text-gray-800 pl-6" data-testid="attraction-details-address">
+                          {attractionDetails.formattedAddress}
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Rating */}
+                    {attractionDetails.rating && (
+                      <div className="p-3 glass-light rounded-xl">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center">
+                            <span className="text-yellow-500 text-lg mr-2">⭐</span>
+                            <span className="font-semibold text-gray-900" data-testid="attraction-details-rating">
+                              {attractionDetails.rating.toFixed(1)}
+                            </span>
+                            {attractionDetails.userRatingsTotal && (
+                              <span className="text-sm text-gray-600 ml-2" data-testid="attraction-details-reviews">
+                                ({attractionDetails.userRatingsTotal} reviews)
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Contact Information */}
+                    {(attractionDetails.formattedPhoneNumber || attractionDetails.website) && (
+                      <div className="p-3 glass-light rounded-xl">
+                        <h5 className="text-sm font-medium text-gray-600 mb-2">Contact</h5>
+                        <div className="space-y-2">
+                          {attractionDetails.formattedPhoneNumber && (
+                            <div className="flex items-center">
+                              <span className="text-green-500 mr-2">📞</span>
+                              <span className="text-sm text-gray-800" data-testid="attraction-details-phone">
+                                {attractionDetails.formattedPhoneNumber}
+                              </span>
+                            </div>
+                          )}
+                          {attractionDetails.website && (
+                            <div className="flex items-center">
+                              <span className="text-blue-500 mr-2">🌐</span>
+                              <a
+                                href={attractionDetails.website}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-sm text-blue-600 hover:text-blue-800 underline"
+                                data-testid="attraction-details-website"
+                              >
+                                Visit website
+                              </a>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Photos */}
+                    {attractionDetails.photos && attractionDetails.photos.length > 0 && (
+                      <div className="p-3 glass-light rounded-xl">
+                        <h5 className="text-sm font-medium text-gray-600 mb-3">Photos</h5>
+                        <div className="grid grid-cols-1 gap-3">
+                          {attractionDetails.photos.slice(0, 3).map((photo: string, photoIndex: number) => (
+                            <img
+                              key={photoIndex}
+                              src={photo}
+                              alt={`${selectedAttraction.name} photo ${photoIndex + 1}`}
+                              className="w-full h-32 object-cover rounded-lg"
+                              data-testid={`attraction-details-photo-${photoIndex}`}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <div className="text-gray-400 mb-2">❌</div>
+                    <p className="text-sm text-gray-600">
+                      Unable to load detailed information for this attraction.
+                    </p>
+                  </div>
+                )}
               </div>
             )}
           </div>
