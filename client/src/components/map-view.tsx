@@ -16,11 +16,15 @@ interface MapViewProps {
 }
 
 interface LocationInfo {
-  type: 'start' | 'overnight' | 'end' | 'attraction';
+  type: 'start' | 'overnight' | 'end' | 'attraction' | 'map-click';
   name: string;
   dayNumber?: number;
   date?: string;
   description?: string;
+  coordinates?: {
+    lat: number;
+    lng: number;
+  };
   attractions?: Array<{ name: string; description: string }>;
   placeDetails?: {
     placeId: string;
@@ -59,6 +63,7 @@ export function MapView({ itinerary, isLoading, onItineraryUpdate }: MapViewProp
     const initMap = () => {
       if (!mapRef.current) return;
 
+      console.log('Initializing Google Map...');
       googleMapRef.current = new window.google.maps.Map(mapRef.current, {
         zoom: 5,
         center: { lat: 39.8283, lng: -98.5795 }, // Center of USA for better initial view

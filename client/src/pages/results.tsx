@@ -68,7 +68,7 @@ export default function Results() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-blue-50 via-white to-purple-50">
+    <div className="h-screen flex flex-col bg-gradient-to-br from-blue-50 via-white to-purple-50">
       {/* Header */}
       <header className="glass rounded-none border-b border-white/20 z-50">
         <div className="px-4 md:px-6 py-4">
@@ -192,14 +192,16 @@ export default function Results() {
       </header>
 
       {/* Main Content */}
-      <div className="flex-1 relative">
+      <div className="flex-1 relative h-full">
         {activeView === "map" ? (
-          <MapView 
-            key={`map-${completedTrip.id}-${Date.now()}`}
-            itinerary={completedTrip.itinerary}
-            isLoading={false}
-            onItineraryUpdate={handleItineraryUpdate}
-          />
+          <div className="w-full h-full">
+            <MapView 
+              key={`map-${completedTrip.id}-${Date.now()}`}
+              itinerary={completedTrip.itinerary}
+              isLoading={false}
+              onItineraryUpdate={handleItineraryUpdate}
+            />
+          </div>
         ) : (
           <div className="h-full p-4 md:p-6 overflow-y-auto glass-scrollbar">
             <ItineraryView 
