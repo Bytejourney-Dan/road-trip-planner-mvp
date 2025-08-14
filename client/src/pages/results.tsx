@@ -13,6 +13,8 @@ export default function Results() {
   const [, navigate] = useLocation();
   const [activeView, setActiveView] = useState<ViewMode>("map");
   const [completedTrip, setCompletedTrip] = useState<Trip | undefined>();
+  const [customAttractions, setCustomAttractions] = useState<Map<number, any[]>>(() => new Map());
+  const [removedAttractions, setRemovedAttractions] = useState<Map<number, number[]>>(() => new Map());
   const { toast } = useToast();
 
   useEffect(() => {
@@ -53,6 +55,33 @@ export default function Results() {
   const handleStartOver = () => {
     sessionStorage.removeItem('currentTrip');
     navigate('/');
+  };
+
+  const handleRemoveAttraction = (dayNumber: number, attractionIndex: number, isCustom: boolean) => {
+    if (isCustom) {
+      // Remove custom attraction
+      const currentCustomAttractions = customAttractions.get(dayNumber) || [];
+      const updatedCustomAttractions = currentCustomAttractions.map((attraction: any, index: number) => 
+        index === attractionIndex ? { ...attraction, isRemoved: true } : attraction
+      );
+      
+      const newCustomAttractions = new Map<number, any[]>(customAttractions);
+      newCustomAttractions.set(dayNumber, updatedCustomAttractions);
+      setCustomAttractions(newCustomAttractions);
+    } else {
+      // Mark original attraction as removed
+      const currentRemoved = removedAttractions.get(dayNumber) || [];
+      if (!currentRemoved.includes(attractionIndex)) {
+        const newRemovedAttractions = new Map<number, number[]>(removedAttractions);
+        newRemovedAttractions.set(dayNumber, [...currentRemoved, attractionIndex]);
+        setRemovedAttractions(newRemovedAttractions);
+      }
+    }
+
+    toast({
+      title: "Attraction Removed",
+      description: "The attraction has been removed from your itinerary.",
+    });
   };
 
   if (!completedTrip) {
@@ -220,6 +249,9 @@ export default function Results() {
               itinerary={completedTrip.itinerary}
               isLoading={false}
               onItineraryUpdate={handleItineraryUpdate}
+              customAttractions={customAttractions}
+              removedAttractions={removedAttractions}
+              onRemoveAttraction={handleRemoveAttraction}
             />
           ) : (
             <div className="h-full bg-white/10 backdrop-blur-md">
@@ -239,6 +271,9 @@ export default function Results() {
                 <div className="flex-1 p-6 overflow-y-auto glass-scrollbar">
                   <ItineraryView 
                     itinerary={completedTrip.itinerary}
+                    onRemoveAttraction={handleRemoveAttraction}
+                    customAttractions={customAttractions}
+                    removedAttractions={removedAttractions}
                   />
                 </div>
               </div>
