@@ -13,8 +13,8 @@ export default function Results() {
   const [, navigate] = useLocation();
   const [activeView, setActiveView] = useState<ViewMode>("map");
   const [completedTrip, setCompletedTrip] = useState<Trip | undefined>();
-  const [customAttractions, setCustomAttractions] = useState<Map<number, any[]>>(() => new Map());
-  const [removedAttractions, setRemovedAttractions] = useState<Map<number, number[]>>(() => new Map());
+  const [customAttractions, setCustomAttractions] = useState<Map<number, any[]>>(new Map());
+  const [removedAttractions, setRemovedAttractions] = useState<Map<number, number[]>>(new Map());
   const { toast } = useToast();
 
   useEffect(() => {
