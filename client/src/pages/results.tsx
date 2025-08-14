@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
-import { Map, List, Route as RouteIcon, ArrowLeft, Menu, X } from "lucide-react";
+import { Map, List, Route as RouteIcon, ArrowLeft } from "lucide-react";
 import { MapView } from "@/components/map-view";
 import { ItineraryView } from "@/components/itinerary-view";
 import { Button } from "@/components/ui/button";
@@ -13,7 +13,6 @@ export default function Results() {
   const [, navigate] = useLocation();
   const [activeView, setActiveView] = useState<ViewMode>("map");
   const [completedTrip, setCompletedTrip] = useState<Trip | undefined>();
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -175,100 +174,40 @@ export default function Results() {
               </div>
             </div>
             
-            {/* Mobile Menu Button */}
+            {/* Mobile Toggle Button */}
             <div className="md:hidden">
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="p-2"
-                data-testid="button-mobile-menu"
+                onClick={() => setActiveView(activeView === "map" ? "itinerary" : "map")}
+                className="p-2 hover:bg-white/20 rounded-lg transition-all duration-200"
+                data-testid="button-mobile-toggle"
               >
-                {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-              </Button>
-            </div>
-            
-            {/* Desktop Tab Switches */}
-            <div className="hidden md:flex bg-white/20 rounded-xl p-1">
-              <Button
-                variant="ghost"
-                size="sm"
-                className={`rounded-lg transition-all duration-300 ${
-                  activeView === "map"
-                    ? "bg-white text-gray-900 shadow-md"
-                    : "text-gray-600 hover:text-gray-900 hover:bg-white/50"
-                }`}
-                onClick={() => setActiveView("map")}
-                data-testid="tab-map"
-              >
-                <Map className="h-4 w-4 mr-2" />
-                Map
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                className={`rounded-lg transition-all duration-300 ${
-                  activeView === "itinerary"
-                    ? "bg-white text-gray-900 shadow-md"
-                    : "text-gray-600 hover:text-gray-900 hover:bg-white/50"
-                }`}
-                onClick={() => setActiveView("itinerary")}
-                data-testid="tab-itinerary"
-              >
-                <List className="h-4 w-4 mr-2" />
-                Itinerary
+                {activeView === "map" ? (
+                  <>
+                    <List className="h-4 w-4 mr-2" />
+                    <span className="text-sm">Itinerary</span>
+                  </>
+                ) : (
+                  <>
+                    <Map className="h-4 w-4 mr-2" />
+                    <span className="text-sm">Map</span>
+                  </>
+                )}
               </Button>
             </div>
           </div>
         </div>
         
-        {/* Mobile Navigation Menu */}
-        {isMobileMenuOpen && (
-          <div className="md:hidden glass-strong border-t border-white/20 px-4 py-3">
-            <div className="grid grid-cols-2 gap-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                className={`rounded-lg transition-all duration-300 flex flex-col items-center space-y-1 h-auto py-3 ${
-                  activeView === "map"
-                    ? "bg-white text-gray-900 shadow-md"
-                    : "text-gray-600 hover:text-gray-900 hover:bg-white/50"
-                }`}
-                onClick={() => {
-                  setActiveView("map");
-                  setIsMobileMenuOpen(false);
-                }}
-                data-testid="tab-mobile-map"
-              >
-                <Map className="h-5 w-5" />
-                <span className="text-xs">Map</span>
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                className={`rounded-lg transition-all duration-300 flex flex-col items-center space-y-1 h-auto py-3 ${
-                  activeView === "itinerary"
-                    ? "bg-white text-gray-900 shadow-md"
-                    : "text-gray-600 hover:text-gray-900 hover:bg-white/50"
-                }`}
-                onClick={() => {
-                  setActiveView("itinerary");
-                  setIsMobileMenuOpen(false);
-                }}
-                data-testid="tab-mobile-itinerary"
-              >
-                <List className="h-5 w-5" />
-                <span className="text-xs">Itinerary</span>
-              </Button>
-            </div>
-          </div>
-        )}
+
       </header>
 
-      {/* Main Content */}
+      {/* Main Content - Desktop: Side by Side, Mobile: Toggle */}
       <div className="flex-1 relative h-full z-10">
-        {activeView === "map" ? (
-          <div className="w-full h-full">
+        {/* Desktop Split View */}
+        <div className="hidden md:flex h-full">
+          {/* Map Section - 2/3 width */}
+          <div className="w-2/3 h-full relative">
             <MapView 
               key={`map-${completedTrip.id}-${Date.now()}`}
               itinerary={completedTrip.itinerary}
@@ -276,13 +215,59 @@ export default function Results() {
               onItineraryUpdate={handleItineraryUpdate}
             />
           </div>
-        ) : (
-          <div className="h-full p-4 md:p-6 overflow-y-auto glass-scrollbar">
-            <ItineraryView 
-              itinerary={completedTrip.itinerary}
-            />
+          
+          {/* Itinerary Section - 1/3 width */}
+          <div className="w-1/3 h-full bg-white/10 backdrop-blur-md border-l border-white/20">
+            <div className="h-full flex flex-col">
+              {/* Itinerary Header */}
+              <div className="px-6 py-4 border-b border-white/20 bg-white/5">
+                <h2 className="text-lg font-semibold text-gray-900 flex items-center">
+                  <List className="h-5 w-5 mr-2 text-blue-600" />
+                  Trip Itinerary
+                </h2>
+                <p className="text-sm text-gray-600 mt-1">
+                  {completedTrip.itinerary?.totalDays} days • {completedTrip.itinerary?.totalAttractions} attractions
+                </p>
+              </div>
+              
+              {/* Itinerary Content */}
+              <div className="flex-1 p-6 overflow-y-auto glass-scrollbar">
+                <ItineraryView 
+                  itinerary={completedTrip.itinerary}
+                />
+              </div>
+            </div>
           </div>
-        )}
+        </div>
+
+        {/* Mobile Toggle View */}
+        <div className="md:hidden h-full">
+          {activeView === "map" ? (
+            <div className="w-full h-full">
+              <MapView 
+                key={`map-${completedTrip.id}-${Date.now()}`}
+                itinerary={completedTrip.itinerary}
+                isLoading={false}
+                onItineraryUpdate={handleItineraryUpdate}
+              />
+            </div>
+          ) : (
+            <div className="h-full p-4 overflow-y-auto glass-scrollbar">
+              <div className="mb-4">
+                <h2 className="text-lg font-semibold text-gray-900 flex items-center">
+                  <List className="h-5 w-5 mr-2" />
+                  Trip Itinerary
+                </h2>
+                <p className="text-sm text-gray-600 mt-1">
+                  {completedTrip.itinerary?.totalDays} days • {completedTrip.itinerary?.totalAttractions} attractions
+                </p>
+              </div>
+              <ItineraryView 
+                itinerary={completedTrip.itinerary}
+              />
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
