@@ -91,73 +91,25 @@ export default function Landing() {
       </header>
 
       {/* Main Content */}
-      <div className="container mx-auto px-4 py-8 max-w-6xl">
-        <div className="flex flex-col lg:flex-row gap-8 items-start">
-          {/* Left Side - Hero Content */}
-          <div className="flex-1 space-y-8">
-            {/* Hero Section */}
-            <div className="text-center lg:text-left space-y-6">
-              <div className="space-y-4">
-                <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight">
-                  Plan Your Perfect
-                  <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent"> Road Trip</span>
-                </h2>
-                <p className="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto lg:mx-0">
-                  Let AI create personalized itineraries with attractions, routes, and accommodations. 
-                  Explore interactive maps and customize your journey.
-                </p>
-              </div>
-
-              {/* Feature Highlights */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
-                <div className="glass-light rounded-2xl p-6 text-center">
-                  <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-4">
-                    <Sparkles className="h-6 w-6 text-blue-600" />
-                  </div>
-                  <h3 className="font-semibold text-gray-900 mb-2">AI-Powered Planning</h3>
-                  <p className="text-sm text-gray-600">Smart recommendations based on your preferences and travel style</p>
-                </div>
-
-                <div className="glass-light rounded-2xl p-6 text-center">
-                  <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mx-auto mb-4">
-                    <MapPin className="h-6 w-6 text-green-600" />
-                  </div>
-                  <h3 className="font-semibold text-gray-900 mb-2">Interactive Maps</h3>
-                  <p className="text-sm text-gray-600">Visual route planning with Google Maps integration</p>
-                </div>
-
-                <div className="glass-light rounded-2xl p-6 text-center">
-                  <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mx-auto mb-4">
-                    <Calendar className="h-6 w-6 text-purple-600" />
-                  </div>
-                  <h3 className="font-semibold text-gray-900 mb-2">Flexible Itineraries</h3>
-                  <p className="text-sm text-gray-600">Day-by-day schedules with customizable attractions</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Social Proof / Stats */}
-            <div className="glass-light rounded-2xl p-6 lg:p-8">
-              <div className="grid grid-cols-3 gap-6 text-center">
-                <div>
-                  <div className="text-2xl lg:text-3xl font-bold text-blue-600">1000+</div>
-                  <div className="text-sm text-gray-600">Trips Planned</div>
-                </div>
-                <div>
-                  <div className="text-2xl lg:text-3xl font-bold text-green-600">50+</div>
-                  <div className="text-sm text-gray-600">Destinations</div>
-                </div>
-                <div>
-                  <div className="text-2xl lg:text-3xl font-bold text-purple-600">5★</div>
-                  <div className="text-sm text-gray-600">User Rating</div>
-                </div>
-              </div>
+      <div className="container mx-auto px-4 py-8 max-w-4xl">
+        <div className="flex flex-col items-center space-y-12">
+          {/* Hero Section */}
+          <div className="text-center space-y-6 max-w-4xl">
+            <div className="space-y-4">
+              <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight">
+                Plan Your Perfect
+                <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent"> Road Trip</span>
+              </h2>
+              <p className="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto">
+                Let AI create personalized itineraries with attractions, routes, and accommodations. 
+                Explore interactive maps and customize your journey.
+              </p>
             </div>
           </div>
 
-          {/* Right Side - Trip Form */}
-          <div className="w-full lg:w-96 glass-strong rounded-3xl p-6 lg:p-8">
-            <div className="mb-6">
+          {/* Centered Trip Form */}
+          <div className="w-full max-w-md glass-strong rounded-3xl p-6 lg:p-8">
+            <div className="mb-6 text-center">
               <h3 className="text-xl font-semibold text-gray-900 mb-2">Start Planning</h3>
               <p className="text-sm text-gray-600">Tell us about your dream road trip</p>
             </div>
@@ -167,6 +119,51 @@ export default function Landing() {
               isLoading={planTripMutation.isPending}
               showMinimal={true}
             />
+          </div>
+
+          {/* Feature Highlights - Moved to Bottom */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-4xl">
+            <div className="glass-light rounded-2xl p-6 text-center">
+              <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-4">
+                <Sparkles className="h-6 w-6 text-blue-600" />
+              </div>
+              <h3 className="font-semibold text-gray-900 mb-2">AI-Powered Planning</h3>
+              <p className="text-sm text-gray-600">Smart recommendations based on your preferences and travel style</p>
+            </div>
+
+            <div className="glass-light rounded-2xl p-6 text-center">
+              <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mx-auto mb-4">
+                <MapPin className="h-6 w-6 text-green-600" />
+              </div>
+              <h3 className="font-semibold text-gray-900 mb-2">Interactive Maps</h3>
+              <p className="text-sm text-gray-600">Visual route planning with Google Maps integration</p>
+            </div>
+
+            <div className="glass-light rounded-2xl p-6 text-center">
+              <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mx-auto mb-4">
+                <Calendar className="h-6 w-6 text-purple-600" />
+              </div>
+              <h3 className="font-semibold text-gray-900 mb-2">Flexible Itineraries</h3>
+              <p className="text-sm text-gray-600">Day-by-day schedules with customizable attractions</p>
+            </div>
+          </div>
+
+          {/* Social Proof / Stats - Moved to Bottom */}
+          <div className="glass-light rounded-2xl p-6 lg:p-8 w-full max-w-2xl">
+            <div className="grid grid-cols-3 gap-6 text-center">
+              <div>
+                <div className="text-2xl lg:text-3xl font-bold text-blue-600">1000+</div>
+                <div className="text-sm text-gray-600">Trips Planned</div>
+              </div>
+              <div>
+                <div className="text-2xl lg:text-3xl font-bold text-green-600">50+</div>
+                <div className="text-sm text-gray-600">Destinations</div>
+              </div>
+              <div>
+                <div className="text-2xl lg:text-3xl font-bold text-purple-600">5★</div>
+                <div className="text-sm text-gray-600">User Rating</div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
