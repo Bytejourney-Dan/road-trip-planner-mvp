@@ -12,6 +12,13 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+**August 15, 2025 - V2 Release**
+- ✅ **Complete Attraction Removal System**: Fully functional remove button in attraction details panel when clicking yellow markers
+- ✅ **Enhanced User Experience**: Streamlined two-page flow with Route Map and Calendar views
+- ✅ **Advanced Map Integration**: Google Maps with authentic red pins, yellow attraction markers, and interactive route visualization
+- ✅ **AI-Powered Trip Generation**: ChatGPT integration with Nature interest categories and round-trip optimization
+- ✅ **Production Ready**: Comprehensive error handling, responsive design, and optimized performance
+
 **August 14, 2025**
 - ✅ **Two-Page Flow Architecture**: Converted from permanent side-by-side layout to landing page → results page flow
 - ✅ **Landing Page Design**: Hero section with feature highlights, statistics, and prominent trip form
