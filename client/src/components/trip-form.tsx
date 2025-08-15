@@ -392,7 +392,7 @@ export function TripForm({ onSubmit, isLoading, completedTrip, showMinimal = fal
               <Label className="text-sm font-semibold text-gray-800">Travel Interests (Optional)</Label>
             </div>
             
-            <div className="space-y-3 max-h-64 overflow-y-auto glass-scrollbar" data-testid="interests-checkboxes">
+            <div className="space-y-3 max-h-64 overflow-visible glass-scrollbar" data-testid="interests-checkboxes">
               <div className="grid grid-cols-2 gap-3">
                 {[
                   "Historic sites",
@@ -423,7 +423,10 @@ export function TripForm({ onSubmit, isLoading, completedTrip, showMinimal = fal
                 <div className="relative col-span-2" ref={natureDropdownRef}>
                   <button
                     type="button"
-                    onClick={() => setShowNatureDropdown(!showNatureDropdown)}
+                    onClick={() => {
+                      console.log("Nature dropdown clicked, current state:", showNatureDropdown);
+                      setShowNatureDropdown(!showNatureDropdown);
+                    }}
                     className="w-full flex items-center justify-between p-2 rounded-lg hover:bg-white/30 transition-all duration-200 glass-hover"
                     disabled={isLoading}
                     data-testid="button-nature-dropdown"
@@ -442,7 +445,12 @@ export function TripForm({ onSubmit, isLoading, completedTrip, showMinimal = fal
                   </button>
                   
                   {showNatureDropdown && (
-                    <div className="absolute z-[9999] w-full mt-2 glass-strong rounded-xl shadow-lg max-h-60 overflow-y-auto glass-scrollbar">
+                    <div className="absolute z-[99999] w-full mt-2 bg-white border border-gray-200 rounded-xl shadow-lg max-h-60 overflow-y-auto"
+                         style={{
+                           backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                           backdropFilter: 'blur(10px)',
+                           border: '1px solid rgba(255, 255, 255, 0.2)'
+                         }}>
                       <div className="p-3">
                         <div className="grid grid-cols-1 gap-2">
                           {[
