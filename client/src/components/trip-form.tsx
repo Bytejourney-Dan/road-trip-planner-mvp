@@ -31,6 +31,7 @@ export function TripForm({ onSubmit, isLoading, completedTrip, showMinimal = fal
 
   const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
   const [selectedNatureTypes, setSelectedNatureTypes] = useState<string[]>([]);
+  const [showNatureDropdown, setShowNatureDropdown] = useState(false);
   const [startLocationInput, setStartLocationInput] = useState("");
   const [endLocationInput, setEndLocationInput] = useState("");
   const [showStartSuggestions, setShowStartSuggestions] = useState(false);
@@ -40,6 +41,7 @@ export function TripForm({ onSubmit, isLoading, completedTrip, showMinimal = fal
   
   const startInputRef = useRef<HTMLInputElement>(null);
   const endInputRef = useRef<HTMLInputElement>(null);
+  const natureDropdownRef = useRef<HTMLDivElement>(null);
   
   const cities = [
     "New York, NY", "Los Angeles, CA", "Chicago, IL", "Houston, TX", "Phoenix, AZ",
@@ -68,22 +70,18 @@ export function TripForm({ onSubmit, isLoading, completedTrip, showMinimal = fal
   };
 
   const handleInterestToggle = (interest: string, checked: boolean) => {
+    if (interest === "Nature" && checked) {
+      // When Nature is clicked, show dropdown instead of adding to interests
+      setShowNatureDropdown(true);
+      return;
+    }
+    
     setSelectedInterests(prev => {
       const newInterests = checked 
         ? [...prev, interest]
         : prev.filter(i => i !== interest);
       
-      // Combine regular interests with nature types
-      const allInterests = [...newInterests];
-      if (selectedNatureTypes.length > 0 && newInterests.includes("Nature")) {
-        allInterests.push(`Nature: ${selectedNatureTypes.join(", ")}`);
-        // Remove the base "Nature" since we have specific types
-        const finalInterests = allInterests.filter(i => i !== "Nature");
-        handleInputChange("interests", finalInterests);
-      } else {
-        handleInputChange("interests", allInterests);
-      }
-      
+      handleInputChange("interests", newInterests);
       return newInterests;
     });
   };
@@ -94,13 +92,14 @@ export function TripForm({ onSubmit, isLoading, completedTrip, showMinimal = fal
         ? [...prev, natureType]
         : prev.filter(t => t !== natureType);
       
-      // Update the combined interests
+      // Update the combined interests - remove old nature interests and add new ones
       const baseInterests = selectedInterests.filter(i => !i.startsWith("Nature:"));
       const allInterests = [...baseInterests];
       
-      if (newTypes.length > 0 && selectedInterests.includes("Nature")) {
-        allInterests.push(`Nature: ${newTypes.join(", ")}`);
-      }
+      // Add specific nature types as separate interests
+      newTypes.forEach(type => {
+        allInterests.push(`Nature: ${type}`);
+      });
       
       handleInputChange("interests", allInterests);
       return newTypes;
@@ -157,6 +156,9 @@ export function TripForm({ onSubmit, isLoading, completedTrip, showMinimal = fal
       }
       if (endInputRef.current && !endInputRef.current.contains(event.target as Node)) {
         setShowEndSuggestions(false);
+      }
+      if (natureDropdownRef.current && !natureDropdownRef.current.contains(event.target as Node)) {
+        setShowNatureDropdown(false);
       }
     };
 
@@ -393,9 +395,8 @@ export function TripForm({ onSubmit, isLoading, completedTrip, showMinimal = fal
             <div className="space-y-3 max-h-64 overflow-y-auto glass-scrollbar" data-testid="interests-checkboxes">
               <div className="grid grid-cols-2 gap-3">
                 {[
-                  "Nature",
                   "Historic sites",
-                  "Adventure and outdoor activities",
+                  "Adventure and outdoor activities", 
                   "Art and galleries",
                   "Music and entertainment",
                   "Architecture"
@@ -417,45 +418,70 @@ export function TripForm({ onSubmit, isLoading, completedTrip, showMinimal = fal
                     </Label>
                   </div>
                 ))}
+                
+                {/* Nature Dropdown */}
+                <div className="relative col-span-2" ref={natureDropdownRef}>
+                  <button
+                    type="button"
+                    onClick={() => setShowNatureDropdown(!showNatureDropdown)}
+                    className="w-full flex items-center justify-between p-2 rounded-lg hover:bg-white/30 transition-all duration-200 glass-hover"
+                    disabled={isLoading}
+                    data-testid="button-nature-dropdown"
+                  >
+                    <div className="flex items-center space-x-2">
+                      <div className="w-4 h-4 border border-white/30 rounded bg-gradient-to-r from-green-500 to-emerald-500 flex items-center justify-center">
+                        {selectedNatureTypes.length > 0 && (
+                          <CheckCircle className="h-3 w-3 text-white" />
+                        )}
+                      </div>
+                      <Label className="text-sm font-medium text-gray-800 select-none">
+                        Nature {selectedNatureTypes.length > 0 && `(${selectedNatureTypes.length})`}
+                      </Label>
+                    </div>
+                    <ChevronDown className={`h-4 w-4 text-gray-500 transition-transform duration-200 ${showNatureDropdown ? 'transform rotate-180' : ''}`} />
+                  </button>
+                  
+                  {showNatureDropdown && (
+                    <div className="absolute z-[9999] w-full mt-2 glass-strong rounded-xl shadow-lg max-h-60 overflow-y-auto glass-scrollbar">
+                      <div className="p-3">
+                        <div className="grid grid-cols-1 gap-2">
+                          {[
+                            "National and State Parks",
+                            "Beaches and coast",
+                            "Waterfalls", 
+                            "Desert",
+                            "Forest",
+                            "Mountains",
+                            "Lakes",
+                            "Rivers",
+                            "Canyons",
+                            "Hot springs"
+                          ].map((natureType) => (
+                            <div key={natureType} className="flex items-center space-x-2 p-2 rounded-lg hover:bg-white/30 transition-all duration-200">
+                              <Checkbox
+                                id={`nature-${natureType}`}
+                                checked={selectedNatureTypes.includes(natureType)}
+                                onCheckedChange={(checked) => handleNatureTypeToggle(natureType, !!checked)}
+                                disabled={isLoading}
+                                data-testid={`checkbox-nature-${natureType.toLowerCase().replace(/\s+/g, '-')}`}
+                                className="border-white/30 data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-green-500 data-[state=checked]:to-emerald-500 data-[state=checked]:border-green-400"
+                              />
+                              <Label 
+                                htmlFor={`nature-${natureType}`}
+                                className="text-sm font-medium cursor-pointer text-gray-800 select-none"
+                              >
+                                {natureType}
+                              </Label>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
 
-              {/* Nature Types Multi-Select Dropdown */}
-              {selectedInterests.includes("Nature") && (
-                <div className="glass-light p-3 rounded-lg">
-                  <Label className="text-xs font-semibold text-gray-700 mb-2 block">Nature Types</Label>
-                  <div className="grid grid-cols-2 gap-2 text-xs">
-                    {[
-                      "National and State Parks",
-                      "Beaches and coast",
-                      "Waterfalls",
-                      "Desert",
-                      "Forest",
-                      "Mountains",
-                      "Lakes",
-                      "Rivers",
-                      "Canyons",
-                      "Hot Springs"
-                    ].map((natureType) => (
-                      <div key={natureType} className="flex items-center space-x-2 p-1 rounded hover:bg-white/20 transition-all duration-200">
-                        <Checkbox
-                          id={`nature-${natureType}`}
-                          checked={selectedNatureTypes.includes(natureType)}
-                          onCheckedChange={(checked) => handleNatureTypeToggle(natureType, !!checked)}
-                          disabled={isLoading}
-                          data-testid={`checkbox-nature-${natureType.toLowerCase().replace(/\s+/g, '-')}`}
-                          className="border-white/30 data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-green-500 data-[state=checked]:to-emerald-500 data-[state=checked]:border-green-400 h-3 w-3"
-                        />
-                        <Label 
-                          htmlFor={`nature-${natureType}`}
-                          className="text-xs font-medium cursor-pointer text-gray-700 select-none"
-                        >
-                          {natureType}
-                        </Label>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
+
             </div>
             
             {selectedInterests.length > 0 && (
