@@ -190,6 +190,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Generate itinerary using ChatGPT
       try {
+        // Debug logging to check interests
+        console.log("=== DEBUG: Route Handler Data ===");
+        console.log("Plan Request interests:", planRequest.interests);
+        console.log("Plan Request body:", req.body);
+        console.log("=================================");
+        
         const itinerary = await generateTripItinerary({
           startLocation: planRequest.startLocation,
           endLocation: planRequest.endLocation,

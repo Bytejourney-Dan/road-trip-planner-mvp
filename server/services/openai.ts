@@ -20,6 +20,14 @@ export interface TripPlanningRequest {
 export async function generateTripItinerary(request: TripPlanningRequest) {
   const isRoundTrip = request.isRoundTrip === "true";
   
+  // Debug logging to check interests
+  console.log("=== DEBUG: ChatGPT Request Data ===");
+  console.log("User Interests:", request.interests);
+  console.log("Interests length:", request.interests?.length || 0);
+  console.log("Start Location:", request.startLocation);
+  console.log("End Location:", request.endLocation);
+  console.log("=====================================");
+  
   const prompt = `You are a professional trip planner specializing in road trips.
 
 Using the trip details provided, create a realistic, day-by-day driving itinerary.

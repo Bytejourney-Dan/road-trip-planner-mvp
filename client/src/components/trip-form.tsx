@@ -51,6 +51,15 @@ export function TripForm({ onSubmit, isLoading, completedTrip, showMinimal = fal
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Debug logging to check interests before submission
+    console.log("=== DEBUG: Form Submission Data ===");
+    console.log("Form data interests:", formData.interests);
+    console.log("Selected interests:", selectedInterests);
+    console.log("Selected nature types:", selectedNatureTypes);
+    console.log("Complete form data:", formData);
+    console.log("====================================");
+    
     onSubmit(formData);
   };
 
