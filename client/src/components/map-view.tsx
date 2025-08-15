@@ -465,6 +465,20 @@ export function MapView({ itinerary, isLoading, onItineraryUpdate, customAttract
               date: day.date,
               placeDetails: (attraction as any).placeDetails
             });
+            
+            // ALSO set selectedAttraction to show the attraction details panel
+            setSelectedAttraction({
+              name: attraction.name,
+              description: attraction.description,
+              dayNumber: day.dayNumber,
+              date: day.date,
+              placeDetails: (attraction as any).placeDetails
+            });
+            
+            // Fetch attraction details from Google Places API
+            if (attraction.name) {
+              fetchAttractionDetails(attraction.name);
+            }
           });
 
           markers.push(attractionMarker);
