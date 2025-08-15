@@ -920,8 +920,68 @@ export function MapView({ itinerary, isLoading, onItineraryUpdate, customAttract
                       </p>
                     </div>
 
-                    {/* Remove Button for Selected Attraction - Always show if we have onRemoveAttraction */}
-                    {onRemoveAttraction && (
+                    {/* Always show remove button - DEBUG */}
+                    <div className="mb-4">
+                      <button
+                        onClick={() => {
+                          console.log("Remove button clicked for:", selectedAttraction?.name);
+                          console.log("Selected location:", selectedLocation);
+                          
+                          // Determine which day this attraction belongs to
+                          let dayNumber = selectedLocation?.dayNumber;
+                          
+                          // If no dayNumber from selectedLocation, find it from the itinerary
+                          if (!dayNumber && selectedAttraction && itinerary) {
+                            for (const day of itinerary.days) {
+                              const foundAttraction = day.attractions.find(attr => attr.name === selectedAttraction.name);
+                              if (foundAttraction) {
+                                dayNumber = day.dayNumber;
+                                break;
+                              }
+                            }
+                          }
+                          
+                          if (!dayNumber) {
+                            console.log("Could not determine day number for attraction");
+                            return;
+                          }
+                          
+                          if (onRemoveAttraction) {
+                            // Find if this is a custom attraction
+                            const customDayAttractions = customAttractions?.[dayNumber] || [];
+                            const isCustomAttraction = customDayAttractions.some(custom => 
+                              custom.name === selectedAttraction.name && !custom.isRemoved
+                            );
+                            
+                            // Find the attraction index in the original day attractions
+                            const originalAttractions = itinerary?.days.find(d => d.dayNumber === dayNumber)?.attractions || [];
+                            const originalIndex = originalAttractions.findIndex(attr => attr.name === selectedAttraction.name);
+                            
+                            if (isCustomAttraction) {
+                              const customIndex = customDayAttractions.findIndex(custom => 
+                                custom.name === selectedAttraction.name && !custom.isRemoved
+                              );
+                              onRemoveAttraction(dayNumber, customIndex, true);
+                            } else if (originalIndex >= 0) {
+                              onRemoveAttraction(dayNumber, originalIndex, false);
+                            }
+                            
+                            // Close the attraction details panel
+                            setSelectedAttraction(null);
+                            setAttractionDetails(null);
+                            setSelectedLocation(null);
+                          }
+                        }}
+                        className="w-full px-4 py-2 bg-red-500 text-white rounded-lg font-medium hover:bg-red-600 transition-all duration-200 flex items-center justify-center space-x-2"
+                        data-testid="button-remove-selected-attraction"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                        <span>Remove from Trip</span>
+                      </button>
+                    </div>
+
+                    {/* Old conditional remove button */}
+                    {false && onRemoveAttraction && (
                       <div className="mb-4">
                         <button
                           onClick={() => {
