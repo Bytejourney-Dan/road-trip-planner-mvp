@@ -896,6 +896,13 @@ export function MapView({ itinerary, isLoading, onItineraryUpdate, customAttract
                   </button>
                 </div>
 
+                {/* Debug Information */}
+                <div className="mb-4 p-3 bg-gray-100 rounded text-xs">
+                  <div>Selected Attraction: {selectedAttraction?.name}</div>
+                  <div>Selected Location Day: {selectedLocation?.dayNumber}</div>
+                  <div>onRemoveAttraction exists: {!!onRemoveAttraction}</div>
+                </div>
+
                 {loadingAttractionDetails ? (
                   <div className="flex items-center justify-center py-8">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
@@ -913,8 +920,8 @@ export function MapView({ itinerary, isLoading, onItineraryUpdate, customAttract
                       </p>
                     </div>
 
-                    {/* Remove Button for Selected Attraction */}
-                    {(selectedLocation?.dayNumber || selectedAttraction) && onRemoveAttraction && (
+                    {/* Remove Button for Selected Attraction - Always show if we have onRemoveAttraction */}
+                    {onRemoveAttraction && (
                       <div className="mb-4">
                         <button
                           onClick={() => {
