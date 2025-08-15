@@ -386,7 +386,7 @@ export function TripForm({ onSubmit, isLoading, completedTrip, showMinimal = fal
           </div>
 
           {/* Travel Interests */}
-          <div className="glass-light p-4 rounded-xl">
+          <div className="glass-light p-4 rounded-xl relative z-50">
             <div className="flex items-center mb-4">
               <Sparkles className="h-4 w-4 text-purple-500 mr-2" />
               <Label className="text-sm font-semibold text-gray-800">Travel Interests (Optional)</Label>
@@ -420,7 +420,7 @@ export function TripForm({ onSubmit, isLoading, completedTrip, showMinimal = fal
                 ))}
                 
                 {/* Nature Dropdown */}
-                <div className="relative col-span-2" ref={natureDropdownRef}>
+                <div className="relative col-span-2 z-[100]" ref={natureDropdownRef}>
                   <button
                     type="button"
                     onClick={() => {
@@ -445,11 +445,12 @@ export function TripForm({ onSubmit, isLoading, completedTrip, showMinimal = fal
                   </button>
                   
                   {showNatureDropdown && (
-                    <div className="absolute z-[99999] w-full mt-2 bg-white border border-gray-200 rounded-xl shadow-lg max-h-60 overflow-y-auto"
+                    <div className="absolute z-[999999] w-full mt-2 bg-white border border-gray-200 rounded-xl shadow-2xl max-h-60 overflow-y-auto"
                          style={{
-                           backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                           backdropFilter: 'blur(10px)',
-                           border: '1px solid rgba(255, 255, 255, 0.2)'
+                           backgroundColor: 'rgba(255, 255, 255, 0.98)',
+                           backdropFilter: 'blur(20px)',
+                           border: '1px solid rgba(0, 0, 0, 0.1)',
+                           boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)'
                          }}>
                       <div className="p-3">
                         <div className="grid grid-cols-1 gap-2">
@@ -504,7 +505,7 @@ export function TripForm({ onSubmit, isLoading, completedTrip, showMinimal = fal
           {/* Submit Button */}
           <Button 
             type="submit"
-            className="w-full h-12 bg-gradient-to-r from-emerald-500 to-blue-600 hover:from-emerald-600 hover:to-blue-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] disabled:opacity-60 disabled:cursor-not-allowed"
+            className="w-full h-12 bg-gradient-to-r from-emerald-500 to-blue-600 hover:from-emerald-600 hover:to-blue-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] disabled:opacity-60 disabled:cursor-not-allowed relative z-10"
             disabled={isLoading}
             data-testid="button-plan-trip"
           >
