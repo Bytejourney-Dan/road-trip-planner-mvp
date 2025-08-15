@@ -31,6 +31,7 @@ Preferred communication style: Simple, everyday language.
 - ✅ **Map Attraction Removal**: Added "Remove from Trip" button to attraction details panel when clicking map markers
 - ✅ **Weekly Calendar Layout**: Transformed calendar to weekly grid format with compact day cards and simplified two-tab navigation
 - ✅ **Streamlined Navigation**: Removed Trip Details tab, keeping only Route Map and Calendar tabs for cleaner interface
+- ✅ **Attraction Details Panel Fix**: Fixed attraction marker click handler to properly show attraction details panel and remove button when clicking yellow attraction markers
 
 **August 13, 2025**
 - ✅ **Comprehensive Location Editing**: Added interactive editing functionality with click-to-add attractions, removal capabilities, and real-time route updates
