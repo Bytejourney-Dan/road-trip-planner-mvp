@@ -897,10 +897,12 @@ export function MapView({ itinerary, isLoading, onItineraryUpdate, customAttract
                 </div>
 
                 {/* Debug Information */}
-                <div className="mb-4 p-3 bg-gray-100 rounded text-xs">
+                <div className="mb-4 p-3 bg-yellow-100 rounded text-xs border-2 border-yellow-400">
+                  <div><strong>DEBUG INFO:</strong></div>
                   <div>Selected Attraction: {selectedAttraction?.name}</div>
                   <div>Selected Location Day: {selectedLocation?.dayNumber}</div>
-                  <div>onRemoveAttraction exists: {!!onRemoveAttraction}</div>
+                  <div>onRemoveAttraction exists: {!!onRemoveAttraction ? 'YES' : 'NO'}</div>
+                  <div>attractionDetails exists: {!!attractionDetails ? 'YES' : 'NO'}</div>
                 </div>
 
                 {loadingAttractionDetails ? (
@@ -920,57 +922,13 @@ export function MapView({ itinerary, isLoading, onItineraryUpdate, customAttract
                       </p>
                     </div>
 
-                    {/* Always show remove button - DEBUG */}
-                    <div className="mb-4">
+                    {/* TEST REMOVE BUTTON - ALWAYS VISIBLE */}
+                    <div className="mb-4 p-4 bg-red-50 border-2 border-red-300 rounded">
+                      <div className="text-sm text-red-600 mb-2">TEST: Remove Button Section</div>
                       <button
                         onClick={() => {
+                          alert("Remove button clicked for: " + selectedAttraction?.name);
                           console.log("Remove button clicked for:", selectedAttraction?.name);
-                          console.log("Selected location:", selectedLocation);
-                          
-                          // Determine which day this attraction belongs to
-                          let dayNumber = selectedLocation?.dayNumber;
-                          
-                          // If no dayNumber from selectedLocation, find it from the itinerary
-                          if (!dayNumber && selectedAttraction && itinerary) {
-                            for (const day of itinerary.days) {
-                              const foundAttraction = day.attractions.find(attr => attr.name === selectedAttraction.name);
-                              if (foundAttraction) {
-                                dayNumber = day.dayNumber;
-                                break;
-                              }
-                            }
-                          }
-                          
-                          if (!dayNumber) {
-                            console.log("Could not determine day number for attraction");
-                            return;
-                          }
-                          
-                          if (onRemoveAttraction) {
-                            // Find if this is a custom attraction
-                            const customDayAttractions = customAttractions?.[dayNumber] || [];
-                            const isCustomAttraction = customDayAttractions.some(custom => 
-                              custom.name === selectedAttraction.name && !custom.isRemoved
-                            );
-                            
-                            // Find the attraction index in the original day attractions
-                            const originalAttractions = itinerary?.days.find(d => d.dayNumber === dayNumber)?.attractions || [];
-                            const originalIndex = originalAttractions.findIndex(attr => attr.name === selectedAttraction.name);
-                            
-                            if (isCustomAttraction) {
-                              const customIndex = customDayAttractions.findIndex(custom => 
-                                custom.name === selectedAttraction.name && !custom.isRemoved
-                              );
-                              onRemoveAttraction(dayNumber, customIndex, true);
-                            } else if (originalIndex >= 0) {
-                              onRemoveAttraction(dayNumber, originalIndex, false);
-                            }
-                            
-                            // Close the attraction details panel
-                            setSelectedAttraction(null);
-                            setAttractionDetails(null);
-                            setSelectedLocation(null);
-                          }
                         }}
                         className="w-full px-4 py-2 bg-red-500 text-white rounded-lg font-medium hover:bg-red-600 transition-all duration-200 flex items-center justify-center space-x-2"
                         data-testid="button-remove-selected-attraction"
