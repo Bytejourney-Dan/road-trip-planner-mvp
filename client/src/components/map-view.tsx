@@ -914,27 +914,49 @@ export function MapView({ itinerary, isLoading, onItineraryUpdate, customAttract
                     </div>
 
                     {/* Remove Button for Selected Attraction */}
-                    {selectedLocation && selectedLocation.dayNumber && onRemoveAttraction && (
+                    {(selectedLocation?.dayNumber || selectedAttraction) && onRemoveAttraction && (
                       <div className="mb-4">
                         <button
                           onClick={() => {
+                            console.log("Remove button clicked for:", selectedAttraction?.name);
+                            console.log("Selected location:", selectedLocation);
+                            
+                            // Determine which day this attraction belongs to
+                            let dayNumber = selectedLocation?.dayNumber;
+                            
+                            // If no dayNumber from selectedLocation, find it from the itinerary
+                            if (!dayNumber && selectedAttraction && itinerary) {
+                              for (const day of itinerary.days) {
+                                const foundAttraction = day.attractions.find(attr => attr.name === selectedAttraction.name);
+                                if (foundAttraction) {
+                                  dayNumber = day.dayNumber;
+                                  break;
+                                }
+                              }
+                            }
+                            
+                            if (!dayNumber) {
+                              console.log("Could not determine day number for attraction");
+                              return;
+                            }
+                            
                             // Find if this is a custom attraction
-                            const customDayAttractions = customAttractions?.[selectedLocation.dayNumber!] || [];
+                            const customDayAttractions = customAttractions?.[dayNumber] || [];
                             const isCustomAttraction = customDayAttractions.some(custom => 
                               custom.name === selectedAttraction.name && !custom.isRemoved
                             );
                             
                             // Find the attraction index in the original day attractions
-                            const originalAttractions = itinerary?.days.find(d => d.dayNumber === selectedLocation.dayNumber)?.attractions || [];
+                            const originalAttractions = itinerary?.days.find(d => d.dayNumber === dayNumber)?.attractions || [];
                             const originalIndex = originalAttractions.findIndex(attr => attr.name === selectedAttraction.name);
                             
                             if (isCustomAttraction) {
                               const customIndex = customDayAttractions.findIndex(custom => 
                                 custom.name === selectedAttraction.name && !custom.isRemoved
                               );
-                              onRemoveAttraction(selectedLocation.dayNumber!, customIndex, true);
+                              onRemoveAttraction(dayNumber, customIndex, true);
                             } else if (originalIndex >= 0) {
-                              onRemoveAttraction(selectedLocation.dayNumber!, originalIndex, false);
+                              onRemoveAttraction(dayNumber, originalIndex, false);
                             }
                             
                             // Close the attraction details panel
